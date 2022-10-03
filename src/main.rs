@@ -8,12 +8,15 @@ mod sprite_library;
 use sprite::Sprite;
 mod sprite;
 
+use entities::{Hero, Entity};
+mod entities;
+
 struct Game {
     texture: Texture2D,
     atlas: HashMap<String, SpriteLibraryData>,
     scale: f32,
 
-    hero: Sprite,
+    entities: Vec<Box<dyn Entity>>,
 }
 
 impl Game {
@@ -22,22 +25,30 @@ impl Game {
         texture.set_filter(FilterMode::Nearest);
 
         let atlas = read_atlas().unwrap();
-        let hero = Sprite::new(extract_data(&atlas, "hero_walk_right".to_string()));
+        let mut entities: Vec<Box<dyn Entity>> = Vec::new();
+        let hero = Hero::new(0.0, 0.0, &atlas);
+
+        entities.push(Box::new(hero));
 
         Self {
             texture,
             atlas,
             scale: 4.0,
-            hero,
+            entities,
 
         }
     }
 
     fn update(&mut self) {
+        for ent in self.entities.iter_mut() {
+            ent.update();
+        }
     }
 
     fn render(&mut self) {
-        self.hero.draw_sprite(self.texture, self.scale);
+        for ent in self.entities.iter_mut() {
+            ent.render(self.texture, self.scale);
+        }
         
     }
 }
@@ -60,7 +71,7 @@ fn window_conf() -> Conf {
         window_width: 1280,
         window_height: 720,
         fullscreen: false,
-        //high_dpi: true,
+        high_dpi: true,
         ..Default::default()
     }
 }

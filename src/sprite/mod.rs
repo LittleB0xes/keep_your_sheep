@@ -55,17 +55,11 @@ impl Sprite {
 
         };
 
-        draw_texture_ex(texture, 10.0, 10.0, WHITE, params);
-
+        draw_texture_ex(texture, self.position.x * scale, self.position.y * scale, WHITE, params);
     }
-    
-    pub fn current_frame(&self) -> Rect {
-       Rect {
-           x: self.source_rect.x + self.source_rect.w * self.current_frame as f32,
-           y: self.source_rect.y,
-           w: self.source_rect.w,
-           h: self.source_rect.h
-       }
+
+    pub fn set_position_to(&mut self, position: Vec2) {
+        self.position = position;
     }
 
 }
