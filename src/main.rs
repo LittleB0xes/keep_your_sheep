@@ -8,10 +8,8 @@ use macroquad::rand::{gen_range, srand};
 use sprite_library::*;
 mod sprite_library;
 
-use sprite::Sprite;
 mod sprite;
-
-use entities::{Hero, Entity, Sheep};
+use entities::{Entity, EntityType};
 mod entities;
 
 struct Game {
@@ -19,12 +17,12 @@ struct Game {
     atlas: HashMap<String, SpriteLibraryData>,
     scale: f32,
 
-    entities: Vec<Box<dyn Entity>>,
+    entities: Vec<Entity>,
 }
 
 impl Game {
     fn new() -> Self {
-        rand::srand(SystemTime::now()
+        srand(SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_millis() as u64);
@@ -32,17 +30,16 @@ impl Game {
         texture.set_filter(FilterMode::Nearest);
 
         let atlas = read_atlas().unwrap();
-        let mut entities: Vec<Box<dyn Entity>> = Vec::new();
-        let hero = Hero::new(0.0, 0.0, &atlas);
+        let mut entities = Vec::new();
+        let hero = Entity::new(10.0, 10.0, EntityType::Hero, &atlas);
 
-        entities.push(Box::new(hero));
+        entities.push(hero);
         for _i in 0..10 {
             let x = gen_range(0, 19) as f32 * 16.0;
             let y = gen_range(0, 10) as f32 * 16.0;
-            let sheep = Sheep::new(x, y, &atlas);
+            let sheep = Entity::new(x, y, EntityType::Sheep, &atlas);
 
-            entities.push(Box::new(sheep));
-
+            entities.push(sheep);
         }
 
         
