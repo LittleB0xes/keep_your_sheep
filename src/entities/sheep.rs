@@ -65,4 +65,7 @@ impl Entity for Sheep {
     fn get_collision_box(&self) -> Rect {
         self.collision_box.offset(self.position)
     }
+    fn get_y(&self) -> u32 {
+        self.position.y as u32
+    }
 }

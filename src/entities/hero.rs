@@ -77,7 +77,7 @@ impl Entity for Hero {
         if self.direction != Vec2::ZERO {
             self.velocity = self.max_speed * self.direction;
         } else {
-            self.velocity *= 0.9;
+            self.velocity *= 0.8;
         }
 
         self.position += self.velocity;
@@ -87,6 +87,10 @@ impl Entity for Hero {
 
     fn get_collision_box(&self) -> Rect {
         self.collision_box.offset(self.position)
+    }
 
+    fn get_y(&self) -> u32 {
+        self.position.y as u32
+            
     }
 }

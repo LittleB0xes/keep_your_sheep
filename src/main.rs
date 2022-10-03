@@ -56,12 +56,20 @@ impl Game {
     }
 
     fn update(&mut self) {
+
+        // Entites update
         for ent in self.entities.iter_mut() {
             ent.update();
         }
+
     }
 
     fn render(&mut self) {
+        
+        // Sort all element before displaying (depth sorting)
+        self.entities.sort_by_key(|k| k.get_y());
+
+        // ... and draw all the entities
         for ent in self.entities.iter_mut() {
             ent.render(self.texture, self.scale);
         }
