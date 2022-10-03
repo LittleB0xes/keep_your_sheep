@@ -6,7 +6,7 @@ use serde_json::Result;
 use std::collections::HashMap;
 
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone, Copy)]
 pub struct SpriteLibraryData {
   pub x: i32,
   pub y: i32,

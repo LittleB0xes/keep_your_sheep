@@ -30,6 +30,30 @@
 		"h": 16,
 		"frame": 4,
 		"speed": 10
+	},
+	"sheep_walk" : {
+		"x": 64,
+		"y": 0,
+		"w": 16,
+		"h": 16,
+		"frame": 4,
+		"speed": 10
+	},
+	"sheep_walk_down" : {
+		"x": 64,
+		"y": 16,
+		"w": 16,
+		"h": 16,
+		"frame": 4,
+		"speed": 10
+	},
+	"sheep_walk_up" : {
+		"x": 64,
+		"y": 32,
+		"w": 16,
+		"h": 16,
+		"frame": 4,
+		"speed": 10
 	}
 
 }

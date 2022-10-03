@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use macroquad::prelude::*;
+use macroquad::rand::{gen_range, srand};
 
 use sprite_library::*;
 mod sprite_library;
@@ -8,7 +11,7 @@ mod sprite_library;
 use sprite::Sprite;
 mod sprite;
 
-use entities::{Hero, Entity};
+use entities::{Hero, Entity, Sheep};
 mod entities;
 
 struct Game {
@@ -21,6 +24,10 @@ struct Game {
 
 impl Game {
     fn new() -> Self {
+        rand::srand(SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u64);
         let texture = Texture2D::from_file_with_format(include_bytes!("../assets/spritesheet.png"), None);
         texture.set_filter(FilterMode::Nearest);
 
@@ -29,7 +36,16 @@ impl Game {
         let hero = Hero::new(0.0, 0.0, &atlas);
 
         entities.push(Box::new(hero));
+        for _i in 0..10 {
+            let x = gen_range(0, 19) as f32 * 16.0;
+            let y = gen_range(0, 10) as f32 * 16.0;
+            let sheep = Sheep::new(x, y, &atlas);
 
+            entities.push(Box::new(sheep));
+
+        }
+
+        
         Self {
             texture,
             atlas,
