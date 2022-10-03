@@ -2,6 +2,7 @@ use macroquad::prelude::*;
 
 use crate::sprite_library::SpriteLibraryData;
 
+#[derive(Clone, Copy)]
 pub struct Sprite {
     position: Vec2,
     pub source_rect: Rect,

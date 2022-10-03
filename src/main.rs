@@ -9,10 +9,13 @@ use sprite_library::*;
 mod sprite_library;
 
 mod sprite;
+
+
 use entities::{Entity, EntityType};
 mod entities;
 
 struct Game {
+    id_counter: u32,
     texture: Texture2D,
     atlas: HashMap<String, SpriteLibraryData>,
     scale: f32,
@@ -29,21 +32,25 @@ impl Game {
         let texture = Texture2D::from_file_with_format(include_bytes!("../assets/spritesheet.png"), None);
         texture.set_filter(FilterMode::Nearest);
 
+        let mut id_counter = 0;
+
         let atlas = read_atlas().unwrap();
         let mut entities = Vec::new();
-        let hero = Entity::new(10.0, 10.0, EntityType::Hero, &atlas);
+        let hero = Entity::new(10.0, 10.0, EntityType::Hero, id_counter, &atlas);
 
         entities.push(hero);
-        for _i in 0..10 {
+        for _i in 0..2 {
+            id_counter += 1;
             let x = gen_range(0, 19) as f32 * 16.0;
             let y = gen_range(0, 10) as f32 * 16.0;
-            let sheep = Entity::new(x, y, EntityType::Sheep, &atlas);
+            let sheep = Entity::new(x, y, EntityType::Sheep, id_counter, &atlas);
 
             entities.push(sheep);
         }
 
         
         Self {
+            id_counter,
             texture,
             atlas,
             scale: 4.0,
@@ -52,11 +59,18 @@ impl Game {
         }
     }
 
+    fn id_generator( &mut self) -> u32 {
+        self.id_counter += 1;
+        self.id_counter
+    }
+
     fn update(&mut self) {
 
         // Entites update
-        for ent in self.entities.iter_mut() {
-            ent.update();
+        for i  in 0..self.entities.len() {
+            let mut ent = self.entities[i].clone();
+            ent.update(&mut self.entities);
+            self.entities[i] = ent;
         }
 
     }
@@ -88,7 +102,7 @@ async fn main() {
 
 fn window_conf() -> Conf {
     Conf {
-        window_title: "RuneLighter".to_owned(),
+        window_title: "Keep Your Sheep!".to_owned(),
         window_width: 1280,
         window_height: 720,
         fullscreen: false,

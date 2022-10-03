@@ -1,15 +1,15 @@
-
 use std::collections::HashMap;
 
-use crate::sprite_library::{self, SpriteLibraryData};
 use macroquad::input::*;
 use macroquad::math::{Rect, Vec2};
 use macroquad::rand::gen_range;
 use macroquad::texture::Texture2D;
 
-
+use crate::sprite_library::{self, SpriteLibraryData};
 use crate::sprite::Sprite;
 
+
+#[derive(Copy, Clone)]
 pub enum EntityType {
     Hero,
     Sheep
@@ -25,7 +25,9 @@ enum AnimationState {
     WalkDown
 }
 
+#[derive(Clone)]
 pub struct Entity {
+    id: u32,
     entity_type: EntityType,
     position: Vec2,
     velocity: Vec2,
@@ -38,13 +40,15 @@ pub struct Entity {
 }
 
 impl Entity {
-    pub fn new(x: f32, y: f32, entity_type: EntityType, atlas: &HashMap<String, SpriteLibraryData>) -> Self {
+    pub fn new(x: f32, y: f32, entity_type: EntityType, id: u32, atlas: &HashMap<String, SpriteLibraryData>) -> Self {
         let animations = set_animation(&entity_type, atlas);
         let animation_state = AnimationState::WalkUp;
         let mut sprite = Sprite::new(*animations.get(&animation_state).unwrap());
         sprite.set_position_to(Vec2::new(x, y));
 
-        Self {
+        
+        let mut entity = Entity {
+            id,
             entity_type,
             position: Vec2::new(x, y),
             velocity: Vec2::ZERO,
@@ -54,16 +58,25 @@ impl Entity {
             animation_state,
             sprite,
             collision_box: Rect::new(0.0, 0.0, 16.0, 16.0),
+        };
+
+        match entity_type {
+            EntityType::Sheep => sheep_incubator(&mut entity),
+            EntityType::Hero => {},
+            
         }
+
+        entity
     }
+
     pub fn render(&mut self, texture: Texture2D, scale: f32) {
         self.sprite.draw_sprite(texture, scale);
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, entities: &mut Vec<Entity>) {
         match self.entity_type {
-            EntityType::Hero =>{update_hero(self)},
-            EntityType::Sheep => {update_sheep(self)},
+            EntityType::Hero =>{update_hero(self, entities)},
+            EntityType::Sheep => {update_sheep(self, entities)},
         }
 
         self.animation_manager();
@@ -79,9 +92,7 @@ impl Entity {
         else if self.direction.y < 0.0 && self.animation_state != AnimationState::WalkUp {
             self.animation_state = AnimationState::WalkUp;
             self.sprite.set_animation(&self.animations.get(&AnimationState::WalkUp).unwrap());
-            
             self.sprite.play();
-            
         }
         
         if self.direction.x > 0.0 && self.animation_state != AnimationState::WalkRight {
@@ -89,20 +100,16 @@ impl Entity {
             self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
             self.sprite.flip_x = false;
             self.sprite.play();
-
         }
         else if self.direction.x < 0.0 && self.animation_state != AnimationState::WalkLeft {
             self.animation_state = AnimationState::WalkLeft;
             self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
             self.sprite.flip_x = true;
-            
             self.sprite.play();
         }
         else if self.direction == Vec2::ZERO {
             self.animation_state =  AnimationState::Idle;
-
             self.sprite.stop();
-
         }
 
     }
@@ -137,7 +144,7 @@ fn set_animation(entity_type: &EntityType, atlas: &HashMap<String, SpriteLibrary
 }
 
 
-fn update_hero(hero: &mut Entity) {
+fn update_hero(hero: &mut Entity, entities: &mut Vec<Entity>) {
         hero.direction.x = match (is_key_down(KeyCode::Left), is_key_down(KeyCode::Right)) {
             (true, true) | (false, false) => 0.0,
             (true, false) => -1.0,
@@ -149,6 +156,15 @@ fn update_hero(hero: &mut Entity) {
             (true, false) => -1.0,
             (false, true) => 1.0,
         };
+        
+        for ent in entities.iter_mut() {
+            if hero.id != ent.id && hero.get_collision_box().overlaps(&ent.get_collision_box()){
+                println!("id: {}, collision with {}", hero.id, ent.id);
+                hero.direction = Vec2::ZERO;
+                hero.velocity = Vec2::ZERO;
+
+            }
+        }
 
         if hero.direction != Vec2::ZERO {
             hero.velocity = hero.max_speed * hero.direction;
@@ -161,9 +177,11 @@ fn update_hero(hero: &mut Entity) {
         hero.sprite.set_position_to(hero.position);
 }
 
+fn sheep_incubator(sheep: &mut Entity) {
+    sheep.max_speed = 0.5;
+}
 
-
-fn update_sheep(sheep: &mut Entity) {
+fn update_sheep(sheep: &mut Entity, entities: &mut Vec<Entity>) {
     if gen_range(0, 100) < 2 {
         let alea = gen_range(0, 6);
         match alea {
@@ -175,8 +193,17 @@ fn update_sheep(sheep: &mut Entity) {
             
         }
     }
+        for ent in entities.iter_mut() {
+            if sheep.id != ent.id && sheep.get_collision_box().overlaps(&ent.get_collision_box()){
+                println!("id: {}, collision with {}", sheep.id, ent.id);
+                sheep.direction = Vec2::ZERO;
+                sheep.velocity = Vec2::ZERO;
+
+            }
+        }
+
     if sheep.direction != Vec2::ZERO {
-        sheep.velocity = 0.5 * sheep.max_speed * sheep.direction;
+        sheep.velocity = sheep.max_speed * sheep.direction;
     } else {
         sheep.velocity *= 0.8;
     }
