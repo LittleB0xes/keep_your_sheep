@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use crate::sprite_library::{self, SpriteLibraryData};
 use macroquad::input::*;
 use macroquad::math::{Rect, Vec2};
+use macroquad::rand::gen_range;
 use macroquad::texture::Texture2D;
 
 
@@ -16,6 +17,7 @@ pub enum EntityType {
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
 enum AnimationState {
+    Idle,
     WalkSide,
     WalkLeft,
     WalkRight,
@@ -97,6 +99,8 @@ impl Entity {
             self.sprite.play();
         }
         else if self.direction == Vec2::ZERO {
+            self.animation_state =  AnimationState::Idle;
+
             self.sprite.stop();
 
         }
@@ -159,7 +163,28 @@ fn update_hero(hero: &mut Entity) {
 
 
 
-fn update_sheep(sheep: &mut Entity) {}
+fn update_sheep(sheep: &mut Entity) {
+    if gen_range(0, 100) < 2 {
+        let alea = gen_range(0, 6);
+        match alea {
+            0 => sheep.direction = Vec2::new(0.0, 1.0),
+            1 => sheep.direction = Vec2::new(0.0, -1.0),
+            2 => sheep.direction = Vec2::new(1.0, 0.0),
+            3 => sheep.direction = Vec2::new(-1.0, 0.0),
+            _ => sheep.direction = Vec2::ZERO,
+            
+        }
+    }
+    if sheep.direction != Vec2::ZERO {
+        sheep.velocity = 0.5 * sheep.max_speed * sheep.direction;
+    } else {
+        sheep.velocity *= 0.8;
+    }
+
+    sheep.position += sheep.velocity;
+
+    sheep.sprite.set_position_to(sheep.position);
+}
 
 
 
