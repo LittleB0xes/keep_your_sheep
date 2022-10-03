@@ -17,6 +17,8 @@ pub enum EntityType {
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
 enum AnimationState {
     WalkSide,
+    WalkLeft,
+    WalkRight,
     WalkUp,
     WalkDown
 }
@@ -61,6 +63,44 @@ impl Entity {
             EntityType::Hero =>{update_hero(self)},
             EntityType::Sheep => {update_sheep(self)},
         }
+
+        self.animation_manager();
+    }
+
+    pub fn animation_manager(&mut self) {
+        if self.direction.y > 0.0 && self.animation_state != AnimationState::WalkDown {
+            self.animation_state = AnimationState::WalkDown;
+            self.sprite.set_animation(&self.animations.get(&AnimationState::WalkDown).unwrap());
+            self.sprite.play();
+
+        }
+        else if self.direction.y < 0.0 && self.animation_state != AnimationState::WalkUp {
+            self.animation_state = AnimationState::WalkUp;
+            self.sprite.set_animation(&self.animations.get(&AnimationState::WalkUp).unwrap());
+            
+            self.sprite.play();
+            
+        }
+        
+        if self.direction.x > 0.0 && self.animation_state != AnimationState::WalkRight {
+            self.animation_state = AnimationState::WalkRight;
+            self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
+            self.sprite.flip_x = false;
+            self.sprite.play();
+
+        }
+        else if self.direction.x < 0.0 && self.animation_state != AnimationState::WalkLeft {
+            self.animation_state = AnimationState::WalkLeft;
+            self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
+            self.sprite.flip_x = true;
+            
+            self.sprite.play();
+        }
+        else if self.direction == Vec2::ZERO {
+            self.sprite.stop();
+
+        }
+
     }
 
     pub fn get_collision_box(&self) -> Rect {
@@ -82,7 +122,6 @@ fn set_animation(entity_type: &EntityType, atlas: &HashMap<String, SpriteLibrary
     };
 
     for anim in list.iter(){
-        println!("{}", anim.1);
         animations.insert(
             anim.0,
             sprite_library::extract_data(atlas, anim.1.to_string()),
