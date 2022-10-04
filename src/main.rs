@@ -39,7 +39,7 @@ impl Game {
         let hero = Entity::new(10.0, 10.0, EntityType::Hero, id_counter, &atlas);
 
         entities.push(hero);
-        for _i in 0..2 {
+        for _i in 0..10 {
             id_counter += 1;
             let x = gen_range(0, 19) as f32 * 16.0;
             let y = gen_range(0, 10) as f32 * 16.0;
@@ -53,7 +53,7 @@ impl Game {
             id_counter,
             texture,
             atlas,
-            scale: 4.0,
+            scale: 3.0,
             entities,
 
         }

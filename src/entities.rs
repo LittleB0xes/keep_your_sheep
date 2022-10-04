@@ -57,7 +57,7 @@ impl Entity {
             animations,
             animation_state,
             sprite,
-            collision_box: Rect::new(0.0, 0.0, 16.0, 16.0),
+            collision_box: Rect::new(2.0, 10.0, 12.0, 6.0),
         };
 
         match entity_type {
@@ -78,6 +78,25 @@ impl Entity {
             EntityType::Hero =>{update_hero(self, entities)},
             EntityType::Sheep => {update_sheep(self, entities)},
         }
+
+        if self.direction != Vec2::ZERO {
+            self.velocity = self.max_speed * self.direction;
+        } else {
+            self.velocity *= 0.8;
+        }
+        
+        // Collision detection
+        for ent in entities.iter_mut() {
+            if self.id != ent.id && self.get_collision_box().overlaps(&ent.get_collision_box()){
+                self.direction = Vec2::ZERO;
+                self.velocity = Vec2::ZERO
+            }
+        }
+
+    
+        self.position += self.velocity;
+    
+        self.sprite.set_position_to(self.position);
 
         self.animation_manager();
     }
@@ -115,7 +134,7 @@ impl Entity {
     }
 
     pub fn get_collision_box(&self) -> Rect {
-        self.collision_box.offset(self.position)
+        self.collision_box.offset(self.position + self.velocity + self.velocity)
     }
 
     pub fn get_y(&self) -> u32 {
@@ -157,24 +176,7 @@ fn update_hero(hero: &mut Entity, entities: &mut Vec<Entity>) {
             (false, true) => 1.0,
         };
         
-        for ent in entities.iter_mut() {
-            if hero.id != ent.id && hero.get_collision_box().overlaps(&ent.get_collision_box()){
-                println!("id: {}, collision with {}", hero.id, ent.id);
-                hero.direction = Vec2::ZERO;
-                hero.velocity = Vec2::ZERO;
 
-            }
-        }
-
-        if hero.direction != Vec2::ZERO {
-            hero.velocity = hero.max_speed * hero.direction;
-        } else {
-            hero.velocity *= 0.8;
-        }
-
-        hero.position += hero.velocity;
-
-        hero.sprite.set_position_to(hero.position);
 }
 
 fn sheep_incubator(sheep: &mut Entity) {
@@ -193,24 +195,6 @@ fn update_sheep(sheep: &mut Entity, entities: &mut Vec<Entity>) {
             
         }
     }
-        for ent in entities.iter_mut() {
-            if sheep.id != ent.id && sheep.get_collision_box().overlaps(&ent.get_collision_box()){
-                println!("id: {}, collision with {}", sheep.id, ent.id);
-                sheep.direction = Vec2::ZERO;
-                sheep.velocity = Vec2::ZERO;
-
-            }
-        }
-
-    if sheep.direction != Vec2::ZERO {
-        sheep.velocity = sheep.max_speed * sheep.direction;
-    } else {
-        sheep.velocity *= 0.8;
-    }
-
-    sheep.position += sheep.velocity;
-
-    sheep.sprite.set_position_to(sheep.position);
 }
 
 
