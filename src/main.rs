@@ -10,6 +10,9 @@ mod sprite_library;
 
 mod sprite;
 
+use puppet_master::*;
+mod puppet_master;
+
 
 use entities::{Entity, EntityType};
 mod entities;
@@ -39,10 +42,10 @@ impl Game {
         let hero = Entity::new(10.0, 10.0, EntityType::Hero, id_counter, &atlas);
 
         entities.push(hero);
-        for _i in 0..10 {
+        for _i in 0..100 {
             id_counter += 1;
-            let x = gen_range(0, 19) as f32 * 16.0;
-            let y = gen_range(0, 10) as f32 * 16.0;
+            let x = gen_range(0, 26) as f32 * 16.0;
+            let y = gen_range(0, 15) as f32 * 16.0;
             let sheep = Entity::new(x, y, EntityType::Sheep, id_counter, &atlas);
 
             entities.push(sheep);
@@ -65,14 +68,7 @@ impl Game {
     }
 
     fn update(&mut self) {
-
-        // Entites update
-        for i  in 0..self.entities.len() {
-            let mut ent = self.entities[i].clone();
-            ent.update(&mut self.entities);
-            self.entities[i] = ent;
-        }
-
+        puppet_master::play(&mut self.entities);
     }
 
     fn render(&mut self) {
@@ -96,6 +92,7 @@ async fn main() {
         game.update();
 
         game.render();
+        draw_text(&format!("{}", get_fps()), 30.0, 30.0, 16.0, WHITE);
         next_frame().await
     }
 }

@@ -6,8 +6,7 @@ use macroquad::texture::Texture2D;
 use crate::sprite_library::{self, SpriteLibraryData};
 use crate::sprite::Sprite;
 
-use behaviours::Behaviour;
-mod behaviours;
+use crate::puppet_master::Behaviour;
 
 #[derive(Copy, Clone)]
 pub enum EntityType {
@@ -27,17 +26,17 @@ enum AnimationState {
 
 #[derive(Clone)]
 pub struct Entity {
-    id: u32,
+    pub id: u32,
     entity_type: EntityType,
-    position: Vec2,
-    velocity: Vec2,
+    pub position: Vec2,
+    pub velocity: Vec2,
     max_speed: f32,
-    direction: Vec2,
+    pub direction: Vec2,
     sprite: Sprite,
     animations: HashMap<AnimationState, SpriteLibraryData>,
     animation_state: AnimationState,
     collision_box: Rect,
-    behaviour: Behaviour,
+    pub behaviour: Behaviour,
 }
 
 impl Entity {
@@ -75,32 +74,18 @@ impl Entity {
         self.sprite.draw_sprite(texture, scale);
     }
 
-    pub fn update(&mut self, entities: &mut Vec<Entity>) {
-        match self.behaviour {
-            Behaviour::Playable =>{behaviours::play_hero(self, entities)},
-            Behaviour::FreeWalk => {behaviours::free_walk(self)},
-            Behaviour::Transported => {}
-        }
 
+    pub fn apply_direction(&mut self) {
         if self.direction != Vec2::ZERO {
             self.velocity = self.max_speed * self.direction;
         } else {
             self.velocity *= 0.8;
         }
-        
-        // Collision detection
-        for ent in entities.iter_mut() {
-            if self.id != ent.id && self.get_collision_box().overlaps(&ent.get_collision_box()){
-                self.direction = Vec2::ZERO;
-                self.velocity = Vec2::ZERO
-            }
-        }
+    }
 
-    
+    pub fn motion(&mut self) {
         self.position += self.velocity;
-    
         self.sprite.set_position_to(self.position);
-
         self.animation_manager();
     }
 
