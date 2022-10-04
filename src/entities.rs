@@ -27,16 +27,19 @@ enum AnimationState {
 #[derive(Clone)]
 pub struct Entity {
     pub id: u32,
-    entity_type: EntityType,
+    pub entity_type: EntityType,
     pub position: Vec2,
     pub velocity: Vec2,
-    max_speed: f32,
+    pub max_speed: f32,
     pub direction: Vec2,
     sprite: Sprite,
     animations: HashMap<AnimationState, SpriteLibraryData>,
     animation_state: AnimationState,
     collision_box: Rect,
     pub behaviour: Behaviour,
+    pub collidable: bool,
+    pub thing_carried: Option<u32>,
+    pub transporter: Option<u32>,
 }
 
 impl Entity {
@@ -59,6 +62,9 @@ impl Entity {
             sprite,
             collision_box: Rect::new(2.0, 10.0, 12.0, 6.0),
             behaviour: Behaviour::Playable,
+            collidable: true,
+            thing_carried: None,
+            transporter: None,
         };
 
         match entity_type {
@@ -81,6 +87,30 @@ impl Entity {
         } else {
             self.velocity *= 0.8;
         }
+    }
+
+    pub fn apply_transporter_direction(&mut self, speed: f32) {
+        if self.direction != Vec2::ZERO {
+            self.velocity = speed * self.direction;
+        } else {
+            self.velocity *= 0.8;
+        }
+    }
+
+    pub fn take(&mut self, id: u32) {
+        self.thing_carried = Some(id);
+    }
+    pub fn taken_by(&mut self, id: u32) {
+        self.behaviour = Behaviour::Transported;
+        self.transporter = Some(id);
+    }
+    pub fn drop(&mut self) {
+        self.thing_carried = None;
+    }
+
+    pub fn dropped(&mut self) {
+        self.behaviour = Behaviour::FreeWalk;
+        self.transporter = None;
     }
 
     pub fn motion(&mut self) {
