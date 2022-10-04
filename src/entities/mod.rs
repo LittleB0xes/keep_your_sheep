@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
-use macroquad::input::*;
 use macroquad::math::{Rect, Vec2};
-use macroquad::rand::gen_range;
 use macroquad::texture::Texture2D;
 
 use crate::sprite_library::{self, SpriteLibraryData};
 use crate::sprite::Sprite;
 
+use behaviours::Behaviour;
+mod behaviours;
 
 #[derive(Copy, Clone)]
 pub enum EntityType {
@@ -37,6 +37,7 @@ pub struct Entity {
     animations: HashMap<AnimationState, SpriteLibraryData>,
     animation_state: AnimationState,
     collision_box: Rect,
+    behaviour: Behaviour,
 }
 
 impl Entity {
@@ -58,6 +59,7 @@ impl Entity {
             animation_state,
             sprite,
             collision_box: Rect::new(2.0, 10.0, 12.0, 6.0),
+            behaviour: Behaviour::Playable,
         };
 
         match entity_type {
@@ -74,9 +76,10 @@ impl Entity {
     }
 
     pub fn update(&mut self, entities: &mut Vec<Entity>) {
-        match self.entity_type {
-            EntityType::Hero =>{update_hero(self, entities)},
-            EntityType::Sheep => {update_sheep(self, entities)},
+        match self.behaviour {
+            Behaviour::Playable =>{behaviours::play_hero(self, entities)},
+            Behaviour::FreeWalk => {behaviours::free_walk(self)},
+            Behaviour::Transported => {}
         }
 
         if self.direction != Vec2::ZERO {
@@ -163,38 +166,9 @@ fn set_animation(entity_type: &EntityType, atlas: &HashMap<String, SpriteLibrary
 }
 
 
-fn update_hero(hero: &mut Entity, entities: &mut Vec<Entity>) {
-        hero.direction.x = match (is_key_down(KeyCode::Left), is_key_down(KeyCode::Right)) {
-            (true, true) | (false, false) => 0.0,
-            (true, false) => -1.0,
-            (false, true) => 1.0,
-        };
-
-        hero.direction.y = match (is_key_down(KeyCode::Up), is_key_down(KeyCode::Down)) {
-            (true, true) | (false, false) => 0.0,
-            (true, false) => -1.0,
-            (false, true) => 1.0,
-        };
-        
-
-}
-
 fn sheep_incubator(sheep: &mut Entity) {
     sheep.max_speed = 0.5;
-}
-
-fn update_sheep(sheep: &mut Entity, entities: &mut Vec<Entity>) {
-    if gen_range(0, 100) < 2 {
-        let alea = gen_range(0, 6);
-        match alea {
-            0 => sheep.direction = Vec2::new(0.0, 1.0),
-            1 => sheep.direction = Vec2::new(0.0, -1.0),
-            2 => sheep.direction = Vec2::new(1.0, 0.0),
-            3 => sheep.direction = Vec2::new(-1.0, 0.0),
-            _ => sheep.direction = Vec2::ZERO,
-            
-        }
-    }
+    sheep.behaviour = Behaviour::FreeWalk;
 }
 
 
