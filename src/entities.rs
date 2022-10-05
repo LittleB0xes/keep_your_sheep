@@ -35,7 +35,7 @@ pub struct Entity {
     sprite: Sprite,
     animations: HashMap<AnimationState, SpriteLibraryData>,
     animation_state: AnimationState,
-    collision_box: Rect,
+    pub collision_box: Rect,
     pub behaviour: Behaviour,
     pub collidable: bool,
     pub thing_carried: Option<u32>,
@@ -89,7 +89,7 @@ impl Entity {
         }
     }
 
-    pub fn apply_transporter_direction(&mut self, speed: f32) {
+    pub fn apply_direction_with_speed(&mut self, speed: f32) {
         if self.direction != Vec2::ZERO {
             self.velocity = speed * self.direction;
         } else {
@@ -113,6 +113,11 @@ impl Entity {
         self.transporter = None;
     }
 
+    pub fn thrown(&mut self, dir: Vec2, id: u32) {
+        self.behaviour = Behaviour::Thrown { dir: dir, h: 12.0 , thrower: id};
+        self.transporter = None;
+    }
+
     pub fn motion(&mut self) {
         self.position += self.velocity;
         self.sprite.set_position_to(self.position);
@@ -120,34 +125,54 @@ impl Entity {
     }
 
     pub fn animation_manager(&mut self) {
-        if self.direction.y > 0.0 && self.animation_state != AnimationState::WalkDown {
-            self.animation_state = AnimationState::WalkDown;
-            self.sprite.set_animation(&self.animations.get(&AnimationState::WalkDown).unwrap());
-            self.sprite.play();
+        match self.behaviour {
+            Behaviour::FreeWalk | Behaviour::Playable => {
+                if self.direction.y > 0.0 && self.animation_state != AnimationState::WalkDown {
+                    self.animation_state = AnimationState::WalkDown;
+                    self.sprite.set_animation(&self.animations.get(&AnimationState::WalkDown).unwrap());
+                    self.sprite.play();
+        
+                }
+                else if self.direction.y < 0.0 && self.animation_state != AnimationState::WalkUp {
+                    self.animation_state = AnimationState::WalkUp;
+                    self.sprite.set_animation(&self.animations.get(&AnimationState::WalkUp).unwrap());
+                    self.sprite.play();
+                }
+                
+                if self.direction.x > 0.0 && self.animation_state != AnimationState::WalkRight {
+                    self.animation_state = AnimationState::WalkRight;
+                    self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
+                    self.sprite.flip_x = false;
+                    self.sprite.play();
+                }
+                else if self.direction.x < 0.0 && self.animation_state != AnimationState::WalkLeft {
+                    self.animation_state = AnimationState::WalkLeft;
+                    self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
+                    self.sprite.flip_x = true;
+                    self.sprite.play();
+                }
+                else if self.direction == Vec2::ZERO {
+                    self.animation_state =  AnimationState::Idle;
+                    self.sprite.stop();
+                }
 
-        }
-        else if self.direction.y < 0.0 && self.animation_state != AnimationState::WalkUp {
-            self.animation_state = AnimationState::WalkUp;
-            self.sprite.set_animation(&self.animations.get(&AnimationState::WalkUp).unwrap());
-            self.sprite.play();
+            },
+            Behaviour::Transported => {
+                if self.direction.x > 0.0 && !self.sprite.flip_x {
+                    self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
+                    self.sprite.flip_x = true;
+                }
+                else if self.direction.x < 0.0 && self.sprite.flip_x {
+                    self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
+                    self.sprite.flip_x = false;
+                }
+                self.animation_state =  AnimationState::Idle;
+                self.sprite.stop();
+            },
+            Behaviour::Thrown { dir, h, thrower} => {},
         }
         
-        if self.direction.x > 0.0 && self.animation_state != AnimationState::WalkRight {
-            self.animation_state = AnimationState::WalkRight;
-            self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
-            self.sprite.flip_x = false;
-            self.sprite.play();
-        }
-        else if self.direction.x < 0.0 && self.animation_state != AnimationState::WalkLeft {
-            self.animation_state = AnimationState::WalkLeft;
-            self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
-            self.sprite.flip_x = true;
-            self.sprite.play();
-        }
-        else if self.direction == Vec2::ZERO {
-            self.animation_state =  AnimationState::Idle;
-            self.sprite.stop();
-        }
+
 
     }
 
@@ -155,9 +180,11 @@ impl Entity {
         self.collision_box.offset(self.position + self.velocity + self.velocity)
     }
 
-    pub fn get_y(&self) -> u32 {
-        self.position.y as u32
-            
+    pub fn depth_sort(&self) -> u32 {
+        match self.behaviour {
+            Behaviour::Transported => self.position.y as u32 + 12,      // transported item are above the real position
+            _ => self.position.y as u32,
+        }
     }
 }
 

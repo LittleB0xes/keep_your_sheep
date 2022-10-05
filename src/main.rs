@@ -74,7 +74,7 @@ impl Game {
     fn render(&mut self) {
         
         // Sort all element before displaying (depth sorting)
-        self.entities.sort_by_key(|k| k.get_y());
+        self.entities.sort_by_key(|k| k.depth_sort());
 
         // ... and draw all the entities
         for ent in self.entities.iter_mut() {
