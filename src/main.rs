@@ -12,9 +12,14 @@ mod sprite;
 use entities::{Entity, EntityType};
 mod entities;
 
+use level::Level;
+mod level;
+
 struct Game {
     //id_counter: u32,
+    level: Level,
     texture: Texture2D,
+    ground_texture: Texture2D,
     //atlas: HashMap<String, SpriteLibraryData>,
     scale: f32,
 
@@ -32,6 +37,9 @@ impl Game {
         let texture =
             Texture2D::from_file_with_format(include_bytes!("../assets/spritesheet.png"), None);
         texture.set_filter(FilterMode::Nearest);
+
+        let ground_texture = Texture2D::from_file_with_format(include_bytes!("../assets/sheep/simplified/Level_0/Ground.png"), None);
+        ground_texture.set_filter(FilterMode::Nearest);
 
         let mut id_counter = 0;
 
@@ -51,7 +59,9 @@ impl Game {
 
         Self {
             //id_counter,
+            level: Level::new("Level_0".to_string()),
             texture,
+            ground_texture,
             //atlas,
             scale: 3.0,
             entities,
@@ -68,6 +78,10 @@ impl Game {
     }
 
     fn render(&mut self) {
+
+        // Draw ground
+        self.level.render(self.ground_texture, self.scale);
+        
         // Sort all element before displaying (depth sorting)
         self.entities.sort_by_key(|k| k.depth_sort());
 
