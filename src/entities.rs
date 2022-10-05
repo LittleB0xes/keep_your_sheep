@@ -3,15 +3,15 @@ use std::collections::HashMap;
 use macroquad::math::{Rect, Vec2};
 use macroquad::texture::Texture2D;
 
-use crate::sprite_library::{self, SpriteLibraryData};
 use crate::sprite::Sprite;
+use crate::sprite_library::{self, SpriteLibraryData};
 
 use crate::puppet_master::Behaviour;
 
 #[derive(Copy, Clone)]
 pub enum EntityType {
     Hero,
-    Sheep
+    Sheep,
 }
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
@@ -21,7 +21,7 @@ enum AnimationState {
     WalkLeft,
     WalkRight,
     WalkUp,
-    WalkDown
+    WalkDown,
 }
 
 #[derive(Clone)]
@@ -43,13 +43,18 @@ pub struct Entity {
 }
 
 impl Entity {
-    pub fn new(x: f32, y: f32, entity_type: EntityType, id: u32, atlas: &HashMap<String, SpriteLibraryData>) -> Self {
+    pub fn new(
+        x: f32,
+        y: f32,
+        entity_type: EntityType,
+        id: u32,
+        atlas: &HashMap<String, SpriteLibraryData>,
+    ) -> Self {
         let animations = set_animation(&entity_type, atlas);
         let animation_state = AnimationState::WalkUp;
         let mut sprite = Sprite::new(*animations.get(&animation_state).unwrap());
         sprite.set_position_to(Vec2::new(x, y));
 
-        
         let mut entity = Entity {
             id,
             entity_type,
@@ -69,8 +74,7 @@ impl Entity {
 
         match entity_type {
             EntityType::Sheep => sheep_incubator(&mut entity),
-            EntityType::Hero => {},
-            
+            EntityType::Hero => {}
         }
 
         entity
@@ -79,7 +83,6 @@ impl Entity {
     pub fn render(&mut self, texture: Texture2D, scale: f32) {
         self.sprite.draw_sprite(texture, scale);
     }
-
 
     pub fn apply_direction(&mut self) {
         if self.direction != Vec2::ZERO {
@@ -108,13 +111,12 @@ impl Entity {
         self.thing_carried = None;
     }
 
-    pub fn dropped(&mut self) {
-        self.behaviour = Behaviour::FreeWalk;
-        self.transporter = None;
-    }
-
-    pub fn thrown(&mut self, dir: Vec2, id: u32) {
-        self.behaviour = Behaviour::Thrown { dir: dir, h: 12.0 , thrower: id};
+    pub fn thrown(&mut self, dir: Vec2, thrower: u32) {
+        self.behaviour = Behaviour::Thrown {
+            dir,
+            h: 12.0,
+            thrower,
+        };
         self.transporter = None;
     }
 
@@ -129,74 +131,83 @@ impl Entity {
             Behaviour::FreeWalk | Behaviour::Playable => {
                 if self.direction.y > 0.0 && self.animation_state != AnimationState::WalkDown {
                     self.animation_state = AnimationState::WalkDown;
-                    self.sprite.set_animation(&self.animations.get(&AnimationState::WalkDown).unwrap());
+                    self.sprite
+                        .set_animation(&self.animations.get(&AnimationState::WalkDown).unwrap());
                     self.sprite.play();
-        
-                }
-                else if self.direction.y < 0.0 && self.animation_state != AnimationState::WalkUp {
+                } else if self.direction.y < 0.0 && self.animation_state != AnimationState::WalkUp {
                     self.animation_state = AnimationState::WalkUp;
-                    self.sprite.set_animation(&self.animations.get(&AnimationState::WalkUp).unwrap());
+                    self.sprite
+                        .set_animation(&self.animations.get(&AnimationState::WalkUp).unwrap());
                     self.sprite.play();
                 }
-                
+
                 if self.direction.x > 0.0 && self.animation_state != AnimationState::WalkRight {
                     self.animation_state = AnimationState::WalkRight;
-                    self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
+                    self.sprite
+                        .set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
                     self.sprite.flip_x = false;
                     self.sprite.play();
-                }
-                else if self.direction.x < 0.0 && self.animation_state != AnimationState::WalkLeft {
+                } else if self.direction.x < 0.0 && self.animation_state != AnimationState::WalkLeft
+                {
                     self.animation_state = AnimationState::WalkLeft;
-                    self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
+                    self.sprite
+                        .set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
                     self.sprite.flip_x = true;
                     self.sprite.play();
-                }
-                else if self.direction == Vec2::ZERO {
-                    self.animation_state =  AnimationState::Idle;
+                } else if self.direction == Vec2::ZERO {
+                    self.animation_state = AnimationState::Idle;
                     self.sprite.stop();
                 }
-
-            },
+            }
             Behaviour::Transported => {
                 if self.direction.x > 0.0 && !self.sprite.flip_x {
-                    self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
+                    self.sprite
+                        .set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
                     self.sprite.flip_x = true;
-                }
-                else if self.direction.x < 0.0 && self.sprite.flip_x {
-                    self.sprite.set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
+                } else if self.direction.x < 0.0 && self.sprite.flip_x {
+                    self.sprite
+                        .set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
                     self.sprite.flip_x = false;
                 }
-                self.animation_state =  AnimationState::Idle;
+                self.animation_state = AnimationState::Idle;
                 self.sprite.stop();
-            },
-            Behaviour::Thrown { dir, h, thrower} => {},
+            }
+            Behaviour::Thrown { .. } => {}
         }
-        
-
-
     }
 
     pub fn get_collision_box(&self) -> Rect {
-        self.collision_box.offset(self.position + self.velocity + self.velocity)
+        self.collision_box
+            .offset(self.position + self.velocity + self.velocity)
     }
 
     pub fn depth_sort(&self) -> u32 {
         match self.behaviour {
-            Behaviour::Transported => self.position.y as u32 + 12,      // transported item are above the real position
+            Behaviour::Transported => self.position.y as u32 + 12, // transported item are above the real position
             _ => self.position.y as u32,
         }
     }
 }
 
-
-fn set_animation(entity_type: &EntityType, atlas: &HashMap<String, SpriteLibraryData>) -> HashMap<AnimationState, SpriteLibraryData>{
+fn set_animation(
+    entity_type: &EntityType,
+    atlas: &HashMap<String, SpriteLibraryData>,
+) -> HashMap<AnimationState, SpriteLibraryData> {
     let mut animations = HashMap::new();
     let list = match entity_type {
-        EntityType::Hero => [(AnimationState::WalkSide, "hero_walk_right"), (AnimationState::WalkUp, "hero_walk_up"), (AnimationState::WalkDown, "hero_walk_down")],
-        EntityType::Sheep => [(AnimationState::WalkSide, "sheep_walk"), (AnimationState::WalkUp, "sheep_walk_up"), (AnimationState::WalkDown, "sheep_walk_down")],
+        EntityType::Hero => [
+            (AnimationState::WalkSide, "hero_walk_right"),
+            (AnimationState::WalkUp, "hero_walk_up"),
+            (AnimationState::WalkDown, "hero_walk_down"),
+        ],
+        EntityType::Sheep => [
+            (AnimationState::WalkSide, "sheep_walk"),
+            (AnimationState::WalkUp, "sheep_walk_up"),
+            (AnimationState::WalkDown, "sheep_walk_down"),
+        ],
     };
 
-    for anim in list.iter(){
+    for anim in list.iter() {
         animations.insert(
             anim.0,
             sprite_library::extract_data(atlas, anim.1.to_string()),
@@ -204,14 +215,9 @@ fn set_animation(entity_type: &EntityType, atlas: &HashMap<String, SpriteLibrary
     }
 
     animations
-
 }
-
 
 fn sheep_incubator(sheep: &mut Entity) {
     sheep.max_speed = 0.5;
     sheep.behaviour = Behaviour::FreeWalk;
 }
-
-
-

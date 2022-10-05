@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use macroquad::prelude::*;
@@ -8,19 +6,16 @@ use macroquad::rand::{gen_range, srand};
 use sprite_library::*;
 mod sprite_library;
 
-mod sprite;
-
-use puppet_master::*;
 mod puppet_master;
-
+mod sprite;
 
 use entities::{Entity, EntityType};
 mod entities;
 
 struct Game {
-    id_counter: u32,
+    //id_counter: u32,
     texture: Texture2D,
-    atlas: HashMap<String, SpriteLibraryData>,
+    //atlas: HashMap<String, SpriteLibraryData>,
     scale: f32,
 
     entities: Vec<Entity>,
@@ -28,11 +23,14 @@ struct Game {
 
 impl Game {
     fn new() -> Self {
-        srand(SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_millis() as u64);
-        let texture = Texture2D::from_file_with_format(include_bytes!("../assets/spritesheet.png"), None);
+        srand(
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as u64,
+        );
+        let texture =
+            Texture2D::from_file_with_format(include_bytes!("../assets/spritesheet.png"), None);
         texture.set_filter(FilterMode::Nearest);
 
         let mut id_counter = 0;
@@ -51,28 +49,25 @@ impl Game {
             entities.push(sheep);
         }
 
-        
         Self {
-            id_counter,
+            //id_counter,
             texture,
-            atlas,
+            //atlas,
             scale: 3.0,
             entities,
-
         }
     }
 
-    fn id_generator( &mut self) -> u32 {
-        self.id_counter += 1;
-        self.id_counter
-    }
+    //fn id_generator( &mut self) -> u32 {
+    //    self.id_counter += 1;
+    //    self.id_counter
+    //}
 
     fn update(&mut self) {
         puppet_master::play(&mut self.entities);
     }
 
     fn render(&mut self) {
-        
         // Sort all element before displaying (depth sorting)
         self.entities.sort_by_key(|k| k.depth_sort());
 
@@ -80,10 +75,8 @@ impl Game {
         for ent in self.entities.iter_mut() {
             ent.render(self.texture, self.scale);
         }
-        
     }
 }
-
 
 #[macroquad::main(window_conf())]
 async fn main() {

@@ -25,7 +25,7 @@ impl Sprite {
             elapsed: 0,
             current_frame: 0,
             flip_x: false,
-            play: true
+            play: true,
         }
     }
 
@@ -34,12 +34,13 @@ impl Sprite {
         if self.elapsed > self.speed {
             self.current_frame = (self.current_frame + 1) % self.frames;
             self.elapsed = 0;
-            
         }
     }
 
     pub fn draw_sprite(&mut self, texture: Texture2D, scale: f32) {
-        if self.play {self.animate();}
+        if self.play {
+            self.animate();
+        }
         let current_source_rect = Rect {
             x: self.source_rect.x + self.source_rect.w * self.current_frame as f32,
             y: self.source_rect.y,
@@ -64,7 +65,7 @@ impl Sprite {
         );
     }
 
-    pub fn set_animation(&mut self, data: &SpriteLibraryData,) {
+    pub fn set_animation(&mut self, data: &SpriteLibraryData) {
         self.source_rect = Rect::new(data.x as f32, data.y as f32, data.w as f32, data.h as f32);
         self.frames = data.frame;
         self.speed = data.speed;

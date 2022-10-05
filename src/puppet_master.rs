@@ -4,7 +4,6 @@ use macroquad::rand::gen_range;
 
 use crate::entities::Entity;
 
-
 /// the main puppet_master's function
 pub fn play(entities: &mut Vec<Entity>) {
     // Apply each entity's behaviours
@@ -14,7 +13,7 @@ pub fn play(entities: &mut Vec<Entity>) {
             Behaviour::Playable => playable(&mut ent, entities),
             Behaviour::FreeWalk => free_walk(&mut ent),
             Behaviour::Transported => transported(&mut ent, entities),
-            Behaviour::Thrown {dir, h, thrower} => thrown(&mut ent, dir, h, thrower),
+            Behaviour::Thrown { dir, h, thrower } => thrown(&mut ent, dir, h, thrower),
         }
         // Replace by the new updated entity
         entities[i] = ent;
@@ -27,45 +26,21 @@ pub fn play(entities: &mut Vec<Entity>) {
     motion(entities);
 }
 
-
 /// Check collision between entities
 pub fn entity_entity_collision(entities: &mut Vec<Entity>) {
     // Collision detection
     for i in 0..entities.len() {
         let mut ent = entities[i].clone();
         for j in 0..entities.len() {
-
-
-            //let avoid_collision = match (ent.thing_carried, entities[j].transporter) {
-            //    (Some(a), Some(b)) => {
-            //        if a == entities[j].id || ent.id == b {true} else {false}
-            //    },
-
-            //    _ => false
-            //};
-
             // Avoid collison if transported or with a transported thing
             let avoid_collision = match (ent.behaviour, entities[j].behaviour) {
-                (_, Behaviour::Transported)
-                | (Behaviour::Transported, _) => { true },
-                _ => false
-            };
-
-            let avoid_thrower = match (ent.behaviour, entities[j].behaviour) {
-                (Behaviour::Thrown {dir, h, thrower}, _)
-                | (_, Behaviour::Thrown {dir, h, thrower}) => {
-                    if ent.id == thrower || entities[j].id == thrower {true} else {false}
-                }
-
+                (_, Behaviour::Transported) | (Behaviour::Transported, _) => true,
                 _ => false,
-                
             };
-
-
 
             if ent.collidable
                 && !avoid_collision
-                && !avoid_thrower
+                //&& !avoid_thrower
                 && entities[j].collidable
                 && ent.id != entities[j].id
                 && ent
@@ -88,7 +63,7 @@ pub fn motion(entities: &mut Vec<Entity>) {
 }
 
 /// Behaviours enum
-/// 
+///
 /// Playable: for entity controlled by a player
 /// FreeWalk: for a basic random walk
 /// Transported: for an entity carried by another
@@ -97,9 +72,8 @@ pub enum Behaviour {
     Playable,
     FreeWalk,
     Transported,
-    Thrown {dir: Vec2, h: f32, thrower: u32},
+    Thrown { dir: Vec2, h: f32, thrower: u32 },
 }
-
 
 /// For Playable behaviour
 fn playable(ent: &mut Entity, entities: &mut Vec<Entity>) {
@@ -115,32 +89,30 @@ fn playable(ent: &mut Entity, entities: &mut Vec<Entity>) {
         (false, true) => 1.0,
     };
 
-
     // Check if entity take somthing or drop something
     if is_key_pressed(KeyCode::Space) {
         match ent.thing_carried {
             Some(id) => {
-                    for other in entities.iter_mut() {
-                        if other.id == id {
+                for other in entities.iter_mut() {
+                    if other.id == id {
                         other.thrown(ent.direction, ent.id);
                         ent.drop();
-                        }
                     }
-                    
-                },
+                }
+            }
             None => {
                 for other in entities.iter_mut() {
-                    let dist = (ent.get_collision_box().center() - other.get_collision_box().center()).length_squared();
+                    let dist = (ent.get_collision_box().center()
+                        - other.get_collision_box().center())
+                    .length_squared();
                     if other.id != ent.id && dist < 100.0 {
                         ent.take(other.id);
                         other.taken_by(ent.id);
                     }
                 }
             }
-                    
         }
     }
-   
 
     ent.apply_direction();
 }
@@ -165,25 +137,31 @@ fn free_walk(ent: &mut Entity) {
 fn transported(ent: &mut Entity, entities: &mut Vec<Entity>) {
     for other in entities.iter() {
         if other.id == ent.transporter.unwrap() {
+            // To keep the entity in the right direction
             ent.direction = other.direction;
-            //speed = other.max_speed;
-            ent.direction = other.direction;                            // To keep the entity in the right direction
-            ent.position.x = other.position.x;
-            ent.position.y = other.position.y - other.collision_box.h;  // When transported, the entity is above
 
+            // When transported, the entity is above
+            ent.position = Vec2::new(other.position.x, other.position.y - other.collision_box.h);
         }
     }
 }
 fn thrown(ent: &mut Entity, dir: Vec2, h: f32, thrower: u32) {
     ent.direction = dir;
-    if dir.y == 0.0 {ent.direction.y = -0.5}
-    else if dir.y * dir.y != 1.0 {ent.direction.y += 0.02}
+    if dir.y == 0.0 {
+        ent.direction.y = -0.5
+    } else if dir.y * dir.y != 1.0 {
+        ent.direction.y += 0.02
+    }
     ent.apply_direction_with_speed(2.0);
     if h - 0.2 <= 0.0 {
         ent.behaviour = Behaviour::FreeWalk;
-
+        ent.collidable = true;
     } else {
-        ent.behaviour = Behaviour::Thrown { dir: ent.direction, h: h - 0.2 , thrower};
+        ent.behaviour = Behaviour::Thrown {
+            dir: ent.direction,
+            h: h - 0.2,
+            thrower,
+        };
+        ent.collidable = false;
     }
-
 }
