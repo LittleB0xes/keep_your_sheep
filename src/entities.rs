@@ -111,9 +111,10 @@ impl Entity {
         self.thing_carried = None;
     }
 
-    pub fn thrown(&mut self, dir: Vec2, thrower: u32) {
+    pub fn thrown(&mut self, dir: Vec2, yo: f32, thrower: u32) {
         self.behaviour = Behaviour::Thrown {
             dir,
+            yo: yo,
             h: 12.0,
             thrower,
         };
@@ -178,12 +179,21 @@ impl Entity {
 
     pub fn get_collision_box(&self) -> Rect {
         self.collision_box
-            .offset(self.position + self.velocity + self.velocity)
+            .offset(self.position + self.velocity)
+    }
+    pub fn get_collision_box_diff(&self, on_x: bool, on_y: bool) -> Rect {
+        let mut diff_velocity = self.velocity;
+        if !on_x {diff_velocity.x = 0.0}
+        if !on_y {diff_velocity.y = 0.0}
+        
+        self.collision_box
+            .offset(self.position + diff_velocity)
     }
 
     pub fn depth_sort(&self) -> u32 {
         match self.behaviour {
             Behaviour::Transported => self.position.y as u32 + 12, // transported item are above the real position
+            Behaviour::Thrown { yo, .. } => {yo as u32},
             _ => self.position.y as u32,
         }
     }

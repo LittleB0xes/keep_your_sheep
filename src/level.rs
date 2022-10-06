@@ -1,5 +1,5 @@
 use std::path::Path;
-use std::fs::File;
+use std::fs::{File, self};
 
 use macroquad::texture::{Texture2D, draw_texture_ex};
 use macroquad::color::WHITE;
@@ -8,41 +8,38 @@ use macroquad::math::{Rect, Vec2};
 use macroquad::texture::DrawTextureParams;
 use serde::Deserialize;
 
-use crate::entities::Entity;
 
 #[derive(Deserialize)]
-struct SimplifiedLdtk {
-    //pub x: i32,
-    //pub y: i32,
-    pub width: i32,
-    pub height: i32,
-    //pub iid: String,
-    pub layers: Vec<String>,
+struct SimplifiedLdtk{
+    width: i32,
+    height: i32,
 }
 
 
-pub struct Level {
+pub struct Level  {
+    pub cell_w: usize,
+    pub cell_h: usize,
     width: f32,
     height: f32,
-    colision_grid: Vec<u8>,
-    objects: Vec<Entity>
+    pub collision_grid: Vec<u8>,
 }
 
+
 impl Level {
-    pub fn new(level_name: String) -> Level {
-        let ldtk_root = "./assets/sheep/simplified".to_string();
-        let path = format!("{}/{}/data.json", ldtk_root, level_name);
-        let data_path = Path::new(&path);
-        //let data_path = Path::new("./assets/sheep/simplified/Level_0/data.json");
+    pub fn new() -> Level {
+        let data_path = Path::new(&"./assets/sheep/simplified/Level_0/data.json");
         let data_file = File::open(data_path).expect("erreur de lecture - ldtk");
         let data: SimplifiedLdtk = serde_json::from_reader(data_file).unwrap();
 
-        
+        let collision_raw = fs::read_to_string("./assets/sheep/simplified/Level_0/Collision.csv").expect("erreur lecture cvs file");
+        let collision_grid = extract_cvs(collision_raw);
+
         Level {
+            cell_w: (data.width / 16) as usize,
+            cell_h: (data.height / 16) as usize,
             width: data.width as f32,
             height: data.height as f32,
-            colision_grid: Vec::new(),
-            objects: Vec::new(),
+            collision_grid
         }
     }
 
@@ -57,5 +54,21 @@ impl Level {
         draw_texture_ex(texture, 0.0, 0.0, WHITE, params);
     }
 
+    pub fn get_value_at(&self, x: usize, y: usize) -> u8 {
+        self.collision_grid[x + self.cell_w * y]
+    }
+    
+}
 
+
+
+/// A basic approch, just for a specific use
+fn extract_cvs(raw_data: String) -> Vec<u8> {
+    let mut output = Vec::new();
+    for i in 0..raw_data.len() {
+        if raw_data.chars().nth(i).unwrap() as u8 <= 57 && raw_data.chars().nth(i).unwrap() as u8 >= 48 {
+            output.push(raw_data.chars().nth(i).unwrap() as u8 - 48);
+        }
+    }
+    output
 }

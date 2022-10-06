@@ -34,8 +34,7 @@ impl Game {
                 .unwrap()
                 .as_millis() as u64,
         );
-        let texture =
-            Texture2D::from_file_with_format(include_bytes!("../assets/spritesheet.png"), None);
+        let texture = Texture2D::from_file_with_format(include_bytes!("../assets/spritesheet.png"), None);
         texture.set_filter(FilterMode::Nearest);
 
         let ground_texture = Texture2D::from_file_with_format(include_bytes!("../assets/sheep/simplified/Level_0/Ground.png"), None);
@@ -45,10 +44,10 @@ impl Game {
 
         let atlas = read_atlas().unwrap();
         let mut entities = Vec::new();
-        let hero = Entity::new(10.0, 10.0, EntityType::Hero, id_counter, &atlas);
+        let hero = Entity::new(0.0, 0.0, EntityType::Hero, id_counter, &atlas);
 
         entities.push(hero);
-        for _i in 0..10 {
+        for _i in 0..20 {
             id_counter += 1;
             let x = gen_range(0, 26) as f32 * 16.0;
             let y = gen_range(0, 15) as f32 * 16.0;
@@ -59,7 +58,7 @@ impl Game {
 
         Self {
             //id_counter,
-            level: Level::new("Level_0".to_string()),
+            level: Level::new(),
             texture,
             ground_texture,
             //atlas,
@@ -74,7 +73,7 @@ impl Game {
     //}
 
     fn update(&mut self) {
-        puppet_master::play(&mut self.entities);
+        puppet_master::play(&mut self.entities, &self.level);
     }
 
     fn render(&mut self) {
@@ -99,7 +98,7 @@ async fn main() {
         game.update();
 
         game.render();
-        draw_text(&format!("{}", get_fps()), 30.0, 30.0, 16.0, WHITE);
+        //draw_text(&format!("{}", get_fps()), 30.0, 30.0, 16.0, WHITE);
         next_frame().await
     }
 }

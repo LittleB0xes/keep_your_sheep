@@ -1,11 +1,12 @@
 use macroquad::input::*;
-use macroquad::math::Vec2;
+use macroquad::math::{Vec2, Rect};
 use macroquad::rand::gen_range;
 
 use crate::entities::Entity;
+use crate::level::{self, Level};
 
 /// the main puppet_master's function
-pub fn play(entities: &mut Vec<Entity>) {
+pub fn play(entities: &mut Vec<Entity>, level: &Level) {
     // Apply each entity's behaviours
     for i in 0..entities.len() {
         let mut ent = entities[i].clone();
@@ -13,22 +14,23 @@ pub fn play(entities: &mut Vec<Entity>) {
             Behaviour::Playable => playable(&mut ent, entities),
             Behaviour::FreeWalk => free_walk(&mut ent),
             Behaviour::Transported => transported(&mut ent, entities),
-            Behaviour::Thrown { dir, h, thrower } => thrown(&mut ent, dir, h, thrower),
+            Behaviour::Thrown { dir, yo, h, thrower } => thrown(&mut ent, dir, yo, h, thrower),
         }
         // Replace by the new updated entity
         entities[i] = ent;
     }
 
     // Check collision between entities
-    entity_entity_collision(entities);
+    entity_entity_collision(entities, level);
 
     // Make all entities move
     motion(entities);
 }
 
 /// Check collision between entities
-pub fn entity_entity_collision(entities: &mut Vec<Entity>) {
+pub fn entity_entity_collision(entities: &mut Vec<Entity>, level: &Level) {
     // Collision detection
+    // detection on x and y to allow collide and slide
     for i in 0..entities.len() {
         let mut ent = entities[i].clone();
         for j in 0..entities.len() {
@@ -38,19 +40,50 @@ pub fn entity_entity_collision(entities: &mut Vec<Entity>) {
                 _ => false,
             };
 
-            if ent.collidable
-                && !avoid_collision
-                //&& !avoid_thrower
-                && entities[j].collidable
-                && ent.id != entities[j].id
+            let collision =ent.collidable && !avoid_collision && entities[j].collidable && ent.id != entities[j].id;
+
+            // On x
+            if collision
                 && ent
-                    .get_collision_box()
+                    .get_collision_box_diff(true, false)
                     .overlaps(&entities[j].get_collision_box())
             {
-                ent.direction = Vec2::ZERO;
-                ent.velocity = Vec2::ZERO
+                ent.direction.x = 0.0;
+                ent.velocity.x = 0.0;
+            }
+
+            // on y
+            if collision
+                && ent
+                    .get_collision_box_diff(false, true)
+                    .overlaps(&entities[j].get_collision_box())
+            {
+                ent.direction.y = 0.0;
+                ent.velocity.y = 0.0;
             }
         }
+        // Collision, background collision grid... a basic one
+        for i  in 0..level.collision_grid.len() {
+
+            
+            let cell_x = ((i % level.cell_w) * 16) as f32;
+            let cell_y = ((i / level.cell_w) * 16) as f32;
+            // on x
+            if  level.collision_grid[i] != 0 && ent.get_collision_box_diff(true, false).overlaps(&Rect::new(cell_x, cell_y + 6.0, 16.0, 10.0)) {
+                ent.direction.x = 0.0;
+                ent.velocity.x = 0.0; 
+            }
+
+            // on y
+            if  level.collision_grid[i] != 0 && ent.get_collision_box_diff(false, true).overlaps(&Rect::new(cell_x, cell_y + 6.0, 16.0, 10.0)) {
+                ent.direction.y = 0.0;
+                ent.velocity.y = 0.0;
+            }
+        }
+        
+        
+
+
         // Replace by the new updated entity
         entities[i] = ent;
     }
@@ -72,7 +105,7 @@ pub enum Behaviour {
     Playable,
     FreeWalk,
     Transported,
-    Thrown { dir: Vec2, h: f32, thrower: u32 },
+    Thrown { dir: Vec2, yo: f32, h: f32, thrower: u32},
 }
 
 /// For Playable behaviour
@@ -95,7 +128,7 @@ fn playable(ent: &mut Entity, entities: &mut Vec<Entity>) {
             Some(id) => {
                 for other in entities.iter_mut() {
                     if other.id == id {
-                        other.thrown(ent.direction, ent.id);
+                        other.thrown(ent.direction, ent.position.y, ent.id);
                         ent.drop();
                     }
                 }
@@ -145,7 +178,7 @@ fn transported(ent: &mut Entity, entities: &mut Vec<Entity>) {
         }
     }
 }
-fn thrown(ent: &mut Entity, dir: Vec2, h: f32, thrower: u32) {
+fn thrown(ent: &mut Entity, dir: Vec2, yo: f32, h: f32, thrower: u32) {
     ent.direction = dir;
     if dir.y == 0.0 {
         ent.direction.y = -0.5
@@ -159,6 +192,7 @@ fn thrown(ent: &mut Entity, dir: Vec2, h: f32, thrower: u32) {
     } else {
         ent.behaviour = Behaviour::Thrown {
             dir: ent.direction,
+            yo: yo,
             h: h - 0.2,
             thrower,
         };
