@@ -30,9 +30,24 @@ pub fn play(entities: &mut Vec<Entity>, level: &Level) {
 /// Check collision between entities
 pub fn entity_entity_collision(entities: &mut Vec<Entity>, level: &Level) {
     // Collision detection
+
+
     // detection on x and y to allow collide and slide
     for i in 0..entities.len() {
         let mut ent = entities[i].clone();
+
+        // First, we need to stay in the playground
+        let collider = ent.get_collision_box();
+        if collider.x < 0.0 || collider.x + collider.w > level.width {
+            ent.direction.x = 0.0;
+            ent.velocity.x = 0.0; 
+        }
+        if collider.y < 0.0 || collider.y + collider.h > level.height {
+            ent.direction.y = 0.0;
+            ent.velocity.y = 0.0; 
+        }
+
+
         for j in 0..entities.len() {
             // Avoid collison if transported or with a transported thing
             let avoid_collision = match (ent.behaviour, entities[j].behaviour) {

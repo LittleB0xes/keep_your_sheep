@@ -19,8 +19,8 @@ struct SimplifiedLdtk{
 pub struct Level  {
     pub cell_w: usize,
     pub cell_h: usize,
-    width: f32,
-    height: f32,
+    pub width: f32,
+    pub height: f32,
     pub collision_grid: Vec<u8>,
 }
 
