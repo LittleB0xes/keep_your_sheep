@@ -3,7 +3,7 @@ use macroquad::math::{Vec2, Rect};
 use macroquad::rand::gen_range;
 
 use crate::entities::Entity;
-use crate::level::{self, Level};
+use crate::level::Level;
 
 /// the main puppet_master's function
 pub fn play(entities: &mut Vec<Entity>, level: &Level) {
@@ -204,8 +204,6 @@ fn thrown(ent: &mut Entity, dir: Vec2, yo: f32, h: f32, thrower: u32) {
     }
     if h - 0.4 <= 0.0 {
         ent.behaviour = Behaviour::FreeWalk;
-        ent.collidable = true;
-    
     }
     else {
         ent.behaviour = Behaviour::Thrown {
@@ -214,7 +212,6 @@ fn thrown(ent: &mut Entity, dir: Vec2, yo: f32, h: f32, thrower: u32) {
             h: h - 0.4,
             thrower,
         };
-        ent.collidable = false;
     }
     ent.apply_direction_with_speed(2.0);
 }

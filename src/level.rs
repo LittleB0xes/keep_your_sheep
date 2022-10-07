@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::fs::{File, self};
 
-use macroquad::texture::{Texture2D, draw_texture_ex};
+use macroquad::texture::{Texture2D, draw_texture_ex, load_image};
 use macroquad::color::WHITE;
 use macroquad::math::{Rect, Vec2};
 
@@ -13,6 +13,7 @@ use serde::Deserialize;
 struct SimplifiedLdtk{
     width: i32,
     height: i32,
+    layers: Vec<String>,
 }
 
 
@@ -39,7 +40,7 @@ impl Level {
             cell_h: (data.height / 16) as usize,
             width: data.width as f32,
             height: data.height as f32,
-            collision_grid
+            collision_grid,
         }
     }
 
@@ -52,12 +53,9 @@ impl Level {
             flip_y: false,
             pivot: None };
         draw_texture_ex(texture, 0.0, 0.0, WHITE, params);
+        //draw_texture_ex(self.img, 0.0, 0.0, WHITE, params);
     }
 
-    pub fn get_value_at(&self, x: usize, y: usize) -> u8 {
-        self.collision_grid[x + self.cell_w * y]
-    }
-    
 }
 
 

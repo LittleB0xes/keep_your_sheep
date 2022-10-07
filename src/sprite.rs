@@ -58,8 +58,8 @@ impl Sprite {
 
         draw_texture_ex(
             texture,
-            self.position.x * scale,
-            self.position.y * scale,
+            (self.position.x * scale).round(),
+            (self.position.y * scale).round(),
             WHITE,
             params,
         );
