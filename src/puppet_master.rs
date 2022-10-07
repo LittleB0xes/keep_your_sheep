@@ -96,9 +96,6 @@ pub fn entity_entity_collision(entities: &mut Vec<Entity>, level: &Level) {
             }
         }
         
-        
-
-
         // Replace by the new updated entity
         entities[i] = ent;
     }
@@ -201,7 +198,7 @@ fn transported(ent: &mut Entity, entities: &mut Vec<Entity>) {
 fn thrown(ent: &mut Entity, dir: Vec2, yo: f32, h: f32, thrower: u32) {
     ent.direction = dir;
     if dir.y == 0.0 {
-        ent.direction.y = -0.5
+        ent.direction.y = -0.25
     } else if dir.y * dir.y != 1.0 {
         ent.direction.y += 0.025;
     }
