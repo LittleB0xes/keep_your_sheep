@@ -111,10 +111,18 @@ impl Entity {
         self.thing_carried = None;
     }
 
+    pub fn dropped(&mut self, y: f32) {
+
+        // Il faut dropper devant le dropper
+        self.position.y = y + 10.0;
+        self.transporter = None;
+        self.behaviour = Behaviour::FreeWalk;
+    }
+
     pub fn thrown(&mut self, dir: Vec2, yo: f32, thrower: u32) {
         self.behaviour = Behaviour::Thrown {
             dir,
-            yo: yo,
+            yo,
             h: 12.0,
             thrower,
         };

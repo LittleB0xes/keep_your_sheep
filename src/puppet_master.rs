@@ -142,8 +142,12 @@ fn playable(ent: &mut Entity, entities: &mut Vec<Entity>) {
         match ent.thing_carried {
             Some(id) => {
                 for other in entities.iter_mut() {
-                    if other.id == id {
+                    if ent.direction != Vec2::ZERO && other.id == id {
                         other.thrown(ent.direction, ent.position.y, ent.id);
+                        ent.drop();
+                    }
+                    else if ent.direction == Vec2::ZERO && other.id == id {
+                        other.dropped(ent.position.y);
                         ent.drop();
                     }
                 }
@@ -193,24 +197,27 @@ fn transported(ent: &mut Entity, entities: &mut Vec<Entity>) {
         }
     }
 }
+
 fn thrown(ent: &mut Entity, dir: Vec2, yo: f32, h: f32, thrower: u32) {
     ent.direction = dir;
     if dir.y == 0.0 {
         ent.direction.y = -0.5
     } else if dir.y * dir.y != 1.0 {
-        ent.direction.y += 0.02
+        ent.direction.y += 0.025;
     }
-    ent.apply_direction_with_speed(2.0);
-    if h - 0.2 <= 0.0 {
+    if h - 0.4 <= 0.0 {
         ent.behaviour = Behaviour::FreeWalk;
         ent.collidable = true;
-    } else {
+    
+    }
+    else {
         ent.behaviour = Behaviour::Thrown {
             dir: ent.direction,
-            yo: yo,
-            h: h - 0.2,
+            yo,
+            h: h - 0.4,
             thrower,
         };
         ent.collidable = false;
     }
+    ent.apply_direction_with_speed(2.0);
 }
