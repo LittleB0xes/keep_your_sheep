@@ -12,11 +12,14 @@ use crate::puppet_master::Behaviour;
 pub enum EntityType {
     Hero,
     Sheep,
+    Wolf,
 }
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
 enum AnimationState {
     Idle,
+    IdleDown,
+    IdleUp,
     WalkSide,
     WalkLeft,
     WalkRight,
@@ -74,7 +77,8 @@ impl Entity {
 
         match entity_type {
             EntityType::Sheep => sheep_incubator(&mut entity),
-            EntityType::Hero => {}
+            EntityType::Hero => {},
+            EntityType::Wolf => wolf_incubator(&mut entity),
         }
 
         entity
@@ -103,9 +107,10 @@ impl Entity {
     pub fn take(&mut self, id: u32) {
         self.thing_carried = Some(id);
     }
-    pub fn taken_by(&mut self, id: u32) {
+    pub fn taken_by(&mut self, id: u32, at_position: f32) {
         self.behaviour = Behaviour::Transported;
         self.transporter = Some(id);
+        self.position.x = at_position;
     }
     pub fn drop(&mut self) {
         self.thing_carried = None;
@@ -163,9 +168,18 @@ impl Entity {
                         .set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
                     self.sprite.flip_x = true;
                     self.sprite.play();
-                } else if self.direction == Vec2::ZERO {
+                } else if self.direction == Vec2::ZERO && self.animation_state != AnimationState::Idle {
+
+                    // Check the previous state
+                    let played_animation = match self.animation_state {
+                        AnimationState::WalkUp => AnimationState::IdleUp,
+                        AnimationState::WalkDown => AnimationState::IdleDown,
+                        _ => AnimationState::Idle,
+                    };
                     self.animation_state = AnimationState::Idle;
-                    self.sprite.stop();
+                    self.sprite
+                        .set_animation(&self.animations.get(&played_animation).unwrap());
+                    self.sprite.play();
                 }
             }
             Behaviour::Transported => {
@@ -217,12 +231,27 @@ fn set_animation(
             (AnimationState::WalkSide, "hero_walk_right"),
             (AnimationState::WalkUp, "hero_walk_up"),
             (AnimationState::WalkDown, "hero_walk_down"),
+            (AnimationState::Idle, "hero_idle"),
+            (AnimationState::IdleUp, "hero_idle_up"),
+            (AnimationState::IdleDown, "hero_idle_down"),
         ],
         EntityType::Sheep => [
             (AnimationState::WalkSide, "sheep_walk"),
             (AnimationState::WalkUp, "sheep_walk_up"),
             (AnimationState::WalkDown, "sheep_walk_down"),
+            (AnimationState::Idle, "sheep_idle"),
+            (AnimationState::IdleUp, "sheep_idle_up"),
+            (AnimationState::IdleDown, "sheep_idle_down"),
         ],
+        EntityType::Wolf => [
+            (AnimationState::WalkSide, "wolf_walk"),
+            (AnimationState::WalkUp, "wolf_walk"),
+            (AnimationState::WalkDown, "wolf_walk"),
+            (AnimationState::Idle, "wolf_idle"),
+            (AnimationState::IdleUp, "wolf_idle"),
+            (AnimationState::IdleDown, "wolf_idle"),
+
+        ]
     };
 
     for anim in list.iter() {
@@ -238,4 +267,11 @@ fn set_animation(
 fn sheep_incubator(sheep: &mut Entity) {
     sheep.max_speed = 0.5;
     sheep.behaviour = Behaviour::FreeWalk;
+}
+
+fn wolf_incubator(wolf: &mut Entity) {
+    wolf.max_speed = 2.0;
+    wolf.behaviour = Behaviour::FreeWalk;
+    wolf.collision_box = Rect::new(11.0, 10.0, 12.0, 6.0);
+
 }

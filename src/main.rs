@@ -55,6 +55,7 @@ impl Game {
 
             entities.push(sheep);
         }
+        entities.push(Entity::new(10.0, 100.0, EntityType::Wolf, id_counter, &atlas));
 
         Self {
             //id_counter,

@@ -156,7 +156,7 @@ fn playable(ent: &mut Entity, entities: &mut Vec<Entity>) {
                     .length_squared();
                     if other.id != ent.id && dist < 100.0 {
                         ent.take(other.id);
-                        other.taken_by(ent.id);
+                        other.taken_by(ent.id, ent.position.x + (ent.collision_box.x + ent.collision_box.w * 0.5) );
                     }
                 }
             }

@@ -49,7 +49,7 @@ impl Sprite {
         };
         let params = DrawTextureParams {
             source: Some(current_source_rect),
-            dest_size: Some(Vec2::new(16.0 * scale, 16.0 * scale)),
+            dest_size: Some(Vec2::new(self.source_rect.w * scale, self.source_rect.h * scale)),
             rotation: 0.0,
             flip_x: self.flip_x,
             flip_y: false,
@@ -77,6 +77,7 @@ impl Sprite {
 
     pub fn play(&mut self) {
         self.play = true;
+        self.current_frame = 0;
     }
     pub fn stop(&mut self) {
         self.play = false;

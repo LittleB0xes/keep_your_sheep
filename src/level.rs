@@ -53,7 +53,6 @@ impl Level {
             flip_y: false,
             pivot: None };
         draw_texture_ex(texture, 0.0, 0.0, WHITE, params);
-        //draw_texture_ex(self.img, 0.0, 0.0, WHITE, params);
     }
 
 }
