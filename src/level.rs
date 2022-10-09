@@ -17,12 +17,20 @@ struct SimplifiedLdtk{
 }
 
 
+pub struct CBox{
+    rect: Rect,
+    box_type: u8
+}
+
+
+
 pub struct Level  {
     pub cell_w: usize,
     pub cell_h: usize,
     pub width: f32,
     pub height: f32,
     pub collision_grid: Vec<u8>,
+    pub collision_boxes: Vec<CBox>,
 }
 
 
@@ -35,13 +43,39 @@ impl Level {
         let collision_raw = fs::read_to_string("./assets/sheep/simplified/Level_0/Collision.csv").expect("erreur lecture cvs file");
         let collision_grid = extract_cvs(collision_raw);
 
+        let mut collision_boxes = Vec::new();
+        for (index, value) in collision_grid.iter().enumerate() {
+            if *value != 0 {
+                collision_boxes.push(CBox{
+                    rect: Rect { x: 16.0 * (index % (data.width / 16) as usize) as f32, y: 16.0 * (index / (data.width / 16) as usize) as f32 + 5.0, w: 16.0, h: 11.0 },
+                    box_type: *value,
+                });
+
+            }
+        }
+
+
+
         Level {
             cell_w: (data.width / 16) as usize,
             cell_h: (data.height / 16) as usize,
             width: data.width as f32,
             height: data.height as f32,
             collision_grid,
+            collision_boxes
         }
+    }
+
+    pub fn cbox_overlaps(&self, rect: Rect) -> bool {
+        let mut flag = false;
+        for cbox in self.collision_boxes.iter() {
+            if rect.overlaps(&cbox.rect) {
+                flag = true;
+                break;
+            }
+        }
+        
+        flag
     }
 
     pub fn render(&mut self, texture: Texture2D, scale: f32) {
@@ -56,6 +90,7 @@ impl Level {
     }
 
 }
+
 
 
 
