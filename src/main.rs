@@ -99,7 +99,7 @@ async fn main() {
         game.update();
 
         game.render();
-        //draw_text(&format!("{}", get_fps()), 30.0, 30.0, 16.0, WHITE);
+        draw_text(&format!("{}", get_fps()), 30.0, 30.0, 16.0, RED);
         next_frame().await
     }
 }

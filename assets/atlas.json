@@ -7,7 +7,7 @@
 		"frame": 4,
 		"speed": 10
 	},
-	"hero_idle" : {
+	"hero_idle_right" : {
 		"x": 0,
 		"y": 0,
 		"w": 16,
@@ -21,6 +21,14 @@
 		"w": 16,
 		"h": 16,
 		"frame": 4,
+		"speed": 10
+	},
+	"hero_idle_left" : {
+		"x": 0,
+		"y": 16,
+		"w": 16,
+		"h": 16,
+		"frame": 1,
 		"speed": 10
 	},
 	"hero_walk_up" : {
@@ -55,7 +63,7 @@
 		"frame": 1,
 		"speed": 10
 	},
-	"sheep_walk" : {
+	"sheep_walk_right" : {
 		"x": 64,
 		"y": 0,
 		"w": 16,
@@ -63,7 +71,15 @@
 		"frame": 4,
 		"speed": 10
 	},
-	"sheep_idle" : {
+	"sheep_walk_left" : {
+		"x": 64,
+		"y": 16,
+		"w": 16,
+		"h": 16,
+		"frame": 4,
+		"speed": 10
+	},
+	"sheep_idle_right" : {
 		"x": 64,
 		"y": 0,
 		"w": 16,
@@ -71,9 +87,17 @@
 		"frame": 1,
 		"speed": 10
 	},
-	"sheep_idle_down" : {
+	"sheep_idle_left" : {
 		"x": 64,
 		"y": 16,
+		"w": 16,
+		"h": 16,
+		"frame": 1,
+		"speed": 10
+	},
+	"sheep_idle_down" : {
+		"x": 64,
+		"y": 48,
 		"w": 16,
 		"h": 16,
 		"frame": 1,
@@ -89,7 +113,7 @@
 	},
 	"sheep_walk_down" : {
 		"x": 64,
-		"y": 16,
+		"y": 48,
 		"w": 16,
 		"h": 16,
 		"frame": 4,
@@ -103,7 +127,7 @@
 		"frame": 4,
 		"speed": 10
 	},
-	"wolf_walk" : {
+	"wolf_walk_right" : {
 		"x": 128,
 		"y": 0,
 		"w": 32,
@@ -111,10 +135,26 @@
 		"frame": 8,
 		"speed": 5
 	},
-	"wolf_idle" : {
+	"wolf_walk_left" : {
 		"x": 128,
 		"y": 16,
 		"w": 32,
+		"h": 16,
+		"frame": 8,
+		"speed": 5
+	},
+	"wolf_idle_right" : {
+		"x": 128,
+		"y": 32,
+		"w": 32,
+		"h": 16,
+		"frame": 5,
+		"speed": 10
+	},
+	"wolf_idle_left" : {
+		"x": 128,
+		"y": 16,
+		"w": 48,
 		"h": 16,
 		"frame": 5,
 		"speed": 10

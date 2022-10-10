@@ -15,12 +15,12 @@ pub enum EntityType {
     Wolf,
 }
 
-#[derive(Hash, PartialEq, Eq, Copy, Clone)]
+#[derive(Hash, PartialEq, Eq, Copy, Clone, Debug)]
 enum AnimationState {
-    Idle,
+    IdleLeft,
+    IdleRight,
     IdleDown,
     IdleUp,
-    WalkSide,
     WalkLeft,
     WalkRight,
     WalkUp,
@@ -141,62 +141,59 @@ impl Entity {
     }
 
     pub fn animation_manager(&mut self) {
-        match self.behaviour {
+        let current_animation = self.animation_state;
+        self.animation_state = match self.behaviour {
             Behaviour::FreeWalk | Behaviour::Playable => {
-                if self.direction.y > 0.0 && self.animation_state != AnimationState::WalkDown {
-                    self.animation_state = AnimationState::WalkDown;
-                    self.sprite
-                        .set_animation(&self.animations.get(&AnimationState::WalkDown).unwrap());
-                    self.sprite.play();
-                } else if self.direction.y < 0.0 && self.animation_state != AnimationState::WalkUp {
-                    self.animation_state = AnimationState::WalkUp;
-                    self.sprite
-                        .set_animation(&self.animations.get(&AnimationState::WalkUp).unwrap());
-                    self.sprite.play();
+                if self.direction.x == -1.0 {
+                    AnimationState::WalkLeft
                 }
-
-                if self.direction.x > 0.0 && self.animation_state != AnimationState::WalkRight {
-                    self.animation_state = AnimationState::WalkRight;
-                    self.sprite
-                        .set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
-                    self.sprite.flip_x = false;
-                    self.sprite.play();
-                } else if self.direction.x < 0.0 && self.animation_state != AnimationState::WalkLeft
-                {
-                    self.animation_state = AnimationState::WalkLeft;
-                    self.sprite
-                        .set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
-                    self.sprite.flip_x = true;
-                    self.sprite.play();
-                } else if self.direction == Vec2::ZERO && self.animation_state != AnimationState::Idle {
-
-                    // Check the previous state
-                    let played_animation = match self.animation_state {
+                else if self.direction.x == 1.0 {
+                    AnimationState::WalkRight
+                }
+                else if self.direction.y == 1.0 {
+                    AnimationState::WalkDown
+                }
+                else if self.direction.y  == -1.0 {
+                    AnimationState::WalkUp
+                }
+                else if self.direction == Vec2::ZERO {
+                    match current_animation {
+                        AnimationState::WalkLeft => AnimationState::IdleLeft,
+                        AnimationState::WalkRight => AnimationState::IdleRight,
                         AnimationState::WalkUp => AnimationState::IdleUp,
                         AnimationState::WalkDown => AnimationState::IdleDown,
-                        _ => AnimationState::Idle,
-                    };
-                    self.animation_state = AnimationState::Idle;
-                    self.sprite
-                        .set_animation(&self.animations.get(&played_animation).unwrap());
-                    self.sprite.play();
+                        _ => current_animation,
+                    }
+                }
+                else {
+                    current_animation
                 }
             }
             Behaviour::Transported => {
-                if self.direction.x > 0.0 && !self.sprite.flip_x {
-                    self.sprite
-                        .set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
-                    self.sprite.flip_x = true;
-                } else if self.direction.x < 0.0 && self.sprite.flip_x {
-                    self.sprite
-                        .set_animation(&self.animations.get(&AnimationState::WalkSide).unwrap());
-                    self.sprite.flip_x = false;
+                if self.direction.x == -1.0 {
+                    AnimationState::IdleLeft
                 }
-                self.animation_state = AnimationState::Idle;
-                self.sprite.stop();
-            }
-            Behaviour::Thrown { .. } => {}
+                else if self.direction.x == 1.0 {
+                    AnimationState::IdleRight
+                }
+                else if self.direction.y == 1.0 {
+                    AnimationState::IdleDown
+                }
+                else if self.direction.y  == -1.0 {
+                    AnimationState::IdleUp
+                }
+                else {
+                    current_animation
+                }
+            },
+            Behaviour::Thrown { .. } => {current_animation},
+        };
+
+        if self.animation_state != current_animation {
+            self.sprite.set_animation(&self.animations.get(&self.animation_state).unwrap());
+            self.sprite.play();
         }
+
     }
 
     pub fn get_collision_box(&self) -> Rect {
@@ -228,28 +225,34 @@ fn set_animation(
     let mut animations = HashMap::new();
     let list = match entity_type {
         EntityType::Hero => [
-            (AnimationState::WalkSide, "hero_walk_right"),
+            (AnimationState::WalkRight, "hero_walk_right"),
+            (AnimationState::WalkLeft, "hero_walk_left"),
             (AnimationState::WalkUp, "hero_walk_up"),
             (AnimationState::WalkDown, "hero_walk_down"),
-            (AnimationState::Idle, "hero_idle"),
+            (AnimationState::IdleLeft, "hero_idle_left"),
+            (AnimationState::IdleRight, "hero_idle_right"),
             (AnimationState::IdleUp, "hero_idle_up"),
             (AnimationState::IdleDown, "hero_idle_down"),
         ],
         EntityType::Sheep => [
-            (AnimationState::WalkSide, "sheep_walk"),
+            (AnimationState::WalkRight, "sheep_walk_right"),
+            (AnimationState::WalkLeft, "sheep_walk_left"),
             (AnimationState::WalkUp, "sheep_walk_up"),
             (AnimationState::WalkDown, "sheep_walk_down"),
-            (AnimationState::Idle, "sheep_idle"),
+            (AnimationState::IdleLeft, "sheep_idle_left"),
+            (AnimationState::IdleRight, "sheep_idle_right"),
             (AnimationState::IdleUp, "sheep_idle_up"),
             (AnimationState::IdleDown, "sheep_idle_down"),
         ],
         EntityType::Wolf => [
-            (AnimationState::WalkSide, "wolf_walk"),
-            (AnimationState::WalkUp, "wolf_walk"),
-            (AnimationState::WalkDown, "wolf_walk"),
-            (AnimationState::Idle, "wolf_idle"),
-            (AnimationState::IdleUp, "wolf_idle"),
-            (AnimationState::IdleDown, "wolf_idle"),
+            (AnimationState::WalkRight, "wolf_walk_right"),
+            (AnimationState::WalkLeft, "wolf_walk_left"),
+            (AnimationState::WalkUp, "wolf_walk_left"),
+            (AnimationState::WalkDown, "wolf_walk_right"),
+            (AnimationState::IdleLeft, "wolf_idle_left"),
+            (AnimationState::IdleRight, "wolf_idle_right"),
+            (AnimationState::IdleUp, "wolf_idle_left"),
+            (AnimationState::IdleDown, "wolf_idle_right"),
 
         ]
     };
@@ -270,7 +273,7 @@ fn sheep_incubator(sheep: &mut Entity) {
 }
 
 fn wolf_incubator(wolf: &mut Entity) {
-    wolf.max_speed = 2.0;
+    wolf.max_speed = 0.0;//2.0;
     wolf.behaviour = Behaviour::FreeWalk;
     wolf.collision_box = Rect::new(11.0, 10.0, 12.0, 6.0);
 

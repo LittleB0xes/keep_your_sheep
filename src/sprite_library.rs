@@ -33,6 +33,7 @@ pub fn extract_data(atlas: &HashMap<String, SpriteLibraryData>, name: String) ->
         speed: 0,
         frame: 0,
     };
+    
     data.x = atlas.get(&name).unwrap().x;
     data.y = atlas.get(&name).unwrap().y;
     data.w = atlas.get(&name).unwrap().w;

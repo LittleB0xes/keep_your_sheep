@@ -172,7 +172,7 @@ fn playable(ent: &mut Entity, entities: &mut Vec<Entity>, collision_grid: &Vec<u
                     .length_squared();
                     if other.id != ent.id && dist < 100.0 {
                         ent.take(other.id);
-                        other.taken_by(ent.id, ent.position.x + (ent.collision_box.x + ent.collision_box.w * 0.5) );
+                        other.taken_by(ent.id, ent.position.x +  ent.collision_box.w * 0.5 - other.collision_box.x - 0.5 * other.collision_box.w);
                     }
                 }
             }
@@ -206,7 +206,10 @@ fn transported(ent: &mut Entity, entities: &mut Vec<Entity>) {
             ent.direction = other.direction;
 
             // When transported, the entity is above
-            ent.position = Vec2::new(other.position.x, other.position.y - other.collision_box.h);
+            let x = other.position.x;
+            let y = other.position.y - other.collision_box.h;
+            ent.position = Vec2::new(x, y) ;//- 0.5 * (2.0 * other.collision_box.x + other.collision_box.w), other.position.y - other.collision_box.h);
+            ent.direction = other.direction;
         }
     }
 }
