@@ -44,7 +44,7 @@ impl Game {
 
         let atlas = read_atlas().unwrap();
         let mut entities = Vec::new();
-        let hero = Entity::new(0.0, 0.0, EntityType::Hero, id_counter, &atlas);
+        let hero = Entity::new(10.0, 0.0, EntityType::Hero, id_counter, &atlas);
 
         entities.push(hero);
         for _i in 0..20 {

@@ -55,11 +55,11 @@ pub fn entity_entity_collision(entities: &mut Vec<Entity>, level: &Level) {
 
         // First, we need to stay in the playground
         let collider = ent.get_collision_box();
-        if collider.x < 0.0 || collider.x + collider.w > level.width {
+        if collider.x < 8.0 || collider.x + collider.w > level.width - 8.0 {
             ent.direction.x = 0.0;
             ent.velocity.x = 0.0; 
         }
-        if collider.y < 0.0 || collider.y + collider.h > level.height {
+        if collider.y < 8.0 || collider.y + collider.h > level.height {
             ent.direction.y = 0.0;
             ent.velocity.y = 0.0; 
         }
