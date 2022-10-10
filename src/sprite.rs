@@ -79,8 +79,8 @@ impl Sprite {
         self.play = true;
         self.current_frame = 0;
     }
-    pub fn stop(&mut self) {
-        self.play = false;
-        self.current_frame = 0;
-    }
+    //pub fn stop(&mut self) {
+    //    self.play = false;
+    //    self.current_frame = 0;
+    //}
 }

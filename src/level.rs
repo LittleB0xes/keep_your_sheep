@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::fs::{File, self};
 
-use macroquad::texture::{Texture2D, draw_texture_ex, load_image};
+use macroquad::texture::{Texture2D, draw_texture_ex};
 use macroquad::color::WHITE;
 use macroquad::math::{Rect, Vec2};
 
@@ -13,7 +13,7 @@ use serde::Deserialize;
 struct SimplifiedLdtk{
     width: i32,
     height: i32,
-    layers: Vec<String>,
+    //layers: Vec<String>,
 }
 
 

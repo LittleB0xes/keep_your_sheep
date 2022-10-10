@@ -158,11 +158,11 @@ impl Entity {
                 }
                 else if self.direction == Vec2::ZERO {
                     match current_animation {
-                        AnimationState::WalkLeft => AnimationState::IdleLeft,
-                        AnimationState::WalkRight => AnimationState::IdleRight,
-                        AnimationState::WalkUp => AnimationState::IdleUp,
-                        AnimationState::WalkDown => AnimationState::IdleDown,
-                        _ => current_animation,
+                        AnimationState::WalkLeft    => AnimationState::IdleLeft,
+                        AnimationState::WalkRight   => AnimationState::IdleRight,
+                        AnimationState::WalkUp      => AnimationState::IdleUp,
+                        AnimationState::WalkDown    => AnimationState::IdleDown,
+                        _                           => current_animation,
                     }
                 }
                 else {
@@ -226,34 +226,33 @@ fn set_animation(
     let list = match entity_type {
         EntityType::Hero => [
             (AnimationState::WalkRight, "hero_walk_right"),
-            (AnimationState::WalkLeft, "hero_walk_left"),
-            (AnimationState::WalkUp, "hero_walk_up"),
-            (AnimationState::WalkDown, "hero_walk_down"),
-            (AnimationState::IdleLeft, "hero_idle_left"),
+            (AnimationState::WalkLeft,  "hero_walk_left"),
+            (AnimationState::WalkUp,    "hero_walk_up"),
+            (AnimationState::WalkDown,  "hero_walk_down"),
+            (AnimationState::IdleLeft,  "hero_idle_left"),
             (AnimationState::IdleRight, "hero_idle_right"),
-            (AnimationState::IdleUp, "hero_idle_up"),
-            (AnimationState::IdleDown, "hero_idle_down"),
+            (AnimationState::IdleUp,    "hero_idle_up"),
+            (AnimationState::IdleDown,  "hero_idle_down"),
         ],
         EntityType::Sheep => [
             (AnimationState::WalkRight, "sheep_walk_right"),
-            (AnimationState::WalkLeft, "sheep_walk_left"),
-            (AnimationState::WalkUp, "sheep_walk_up"),
-            (AnimationState::WalkDown, "sheep_walk_down"),
-            (AnimationState::IdleLeft, "sheep_idle_left"),
+            (AnimationState::WalkLeft,  "sheep_walk_left"),
+            (AnimationState::WalkUp,    "sheep_walk_up"),
+            (AnimationState::WalkDown,  "sheep_walk_down"),
+            (AnimationState::IdleLeft,  "sheep_idle_left"),
             (AnimationState::IdleRight, "sheep_idle_right"),
-            (AnimationState::IdleUp, "sheep_idle_up"),
-            (AnimationState::IdleDown, "sheep_idle_down"),
+            (AnimationState::IdleUp,    "sheep_idle_up"),
+            (AnimationState::IdleDown,  "sheep_idle_down"),
         ],
         EntityType::Wolf => [
             (AnimationState::WalkRight, "wolf_walk_right"),
-            (AnimationState::WalkLeft, "wolf_walk_left"),
-            (AnimationState::WalkUp, "wolf_walk_left"),
-            (AnimationState::WalkDown, "wolf_walk_right"),
-            (AnimationState::IdleLeft, "wolf_idle_left"),
+            (AnimationState::WalkLeft,  "wolf_walk_left"),
+            (AnimationState::WalkUp,    "wolf_walk_left"),
+            (AnimationState::WalkDown,  "wolf_walk_right"),
+            (AnimationState::IdleLeft,  "wolf_idle_left"),
             (AnimationState::IdleRight, "wolf_idle_right"),
-            (AnimationState::IdleUp, "wolf_idle_left"),
-            (AnimationState::IdleDown, "wolf_idle_right"),
-
+            (AnimationState::IdleUp,    "wolf_idle_left"),
+            (AnimationState::IdleDown,  "wolf_idle_right"),
         ]
     };
 
@@ -276,5 +275,4 @@ fn wolf_incubator(wolf: &mut Entity) {
     wolf.max_speed = 0.0;//2.0;
     wolf.behaviour = Behaviour::FreeWalk;
     wolf.collision_box = Rect::new(11.0, 10.0, 12.0, 6.0);
-
 }
