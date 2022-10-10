@@ -5,6 +5,22 @@ use macroquad::rand::gen_range;
 use crate::entities::Entity;
 use crate::level::Level;
 
+/// Behaviours enum
+///
+/// Playable: for entity controlled by a player
+/// FreeWalk: for a basic random walk
+/// Transported: for an entity carried by another
+#[derive(Clone, Copy, PartialEq)]
+pub enum Behaviour {
+    Playable,
+    FreeWalk,
+    Transported,
+    Thrown { dir: Vec2, yo: f32, h: f32, thrower: u32},
+    DumbDog,
+    RunAway {dir: Vec2, running_time: f32},
+}
+
+
 /// the main puppet_master's function
 pub fn play(entities: &mut Vec<Entity>, level: &Level) {
     // Apply each entity's behaviours
@@ -15,6 +31,8 @@ pub fn play(entities: &mut Vec<Entity>, level: &Level) {
             Behaviour::FreeWalk => free_walk(&mut ent),
             Behaviour::Transported => transported(&mut ent, entities),
             Behaviour::Thrown { dir, yo, h, thrower } => thrown(&mut ent, dir, yo, h, thrower),
+            Behaviour::DumbDog => dumb_dog(&mut ent),
+            Behaviour::RunAway { dir, running_time } => run_away(&mut ent, dir, running_time),
         }
         
         // Replace by the new updated entity
@@ -100,18 +118,6 @@ pub fn motion(entities: &mut Vec<Entity>) {
     }
 }
 
-/// Behaviours enum
-///
-/// Playable: for entity controlled by a player
-/// FreeWalk: for a basic random walk
-/// Transported: for an entity carried by another
-#[derive(Clone, Copy, PartialEq)]
-pub enum Behaviour {
-    Playable,
-    FreeWalk,
-    Transported,
-    Thrown { dir: Vec2, yo: f32, h: f32, thrower: u32},
-}
 
 /// For Playable behaviour
 fn playable(ent: &mut Entity, entities: &mut Vec<Entity>) {
@@ -209,4 +215,23 @@ fn thrown(ent: &mut Entity, dir: Vec2, yo: f32, h: f32, thrower: u32) {
         };
     }
     ent.apply_direction_with_speed(2.0);
+}
+
+fn dumb_dog(ent: &mut Entity) {
+    if gen_range(0, 100) < 2 {
+        let alea = gen_range(0, 6);
+        match alea {
+            0 => ent.direction = Vec2::new(1.0, 1.0),
+            1 => ent.direction = Vec2::new(1.0, -1.0),
+            2 => ent.direction = Vec2::new(-1.0, 1.0),
+            3 => ent.direction = Vec2::new(-1.0, -1.0),
+            _ => ent.direction = Vec2::ZERO,
+        }
+    }
+    ent.apply_direction();
+}
+
+fn run_away(ent: &mut Entity, dir: Vec2, running_time: f32) {
+
+
 }

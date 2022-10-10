@@ -143,7 +143,7 @@ impl Entity {
     pub fn animation_manager(&mut self) {
         let current_animation = self.animation_state;
         self.animation_state = match self.behaviour {
-            Behaviour::FreeWalk | Behaviour::Playable => {
+            Behaviour::FreeWalk | Behaviour::Playable | Behaviour::DumbDog => {
                 if self.direction.x == -1.0 {
                     AnimationState::WalkLeft
                 }
@@ -187,6 +187,7 @@ impl Entity {
                 }
             },
             Behaviour::Thrown { .. } => {current_animation},
+            Behaviour::RunAway { .. } => {current_animation},
         };
 
         if self.animation_state != current_animation {
@@ -224,7 +225,7 @@ fn set_animation(
 ) -> HashMap<AnimationState, SpriteLibraryData> {
     let mut animations = HashMap::new();
     let list = match entity_type {
-        EntityType::Hero => [
+        EntityType::Hero => vec![
             (AnimationState::WalkRight, "hero_walk_right"),
             (AnimationState::WalkLeft,  "hero_walk_left"),
             (AnimationState::WalkUp,    "hero_walk_up"),
@@ -234,7 +235,7 @@ fn set_animation(
             (AnimationState::IdleUp,    "hero_idle_up"),
             (AnimationState::IdleDown,  "hero_idle_down"),
         ],
-        EntityType::Sheep => [
+        EntityType::Sheep => vec![
             (AnimationState::WalkRight, "sheep_walk_right"),
             (AnimationState::WalkLeft,  "sheep_walk_left"),
             (AnimationState::WalkUp,    "sheep_walk_up"),
@@ -244,7 +245,7 @@ fn set_animation(
             (AnimationState::IdleUp,    "sheep_idle_up"),
             (AnimationState::IdleDown,  "sheep_idle_down"),
         ],
-        EntityType::Wolf => [
+        EntityType::Wolf => vec![
             (AnimationState::WalkRight, "wolf_walk_right"),
             (AnimationState::WalkLeft,  "wolf_walk_left"),
             (AnimationState::WalkUp,    "wolf_walk_left"),
@@ -272,7 +273,8 @@ fn sheep_incubator(sheep: &mut Entity) {
 }
 
 fn wolf_incubator(wolf: &mut Entity) {
-    wolf.max_speed = 0.0;//2.0;
+    wolf.max_speed = 2.0;
     wolf.behaviour = Behaviour::FreeWalk;
     wolf.collision_box = Rect::new(11.0, 10.0, 12.0, 6.0);
+    wolf.behaviour = Behaviour::DumbDog;
 }

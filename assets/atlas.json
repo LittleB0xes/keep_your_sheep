@@ -158,7 +158,24 @@
 		"h": 16,
 		"frame": 5,
 		"speed": 10
+	},
+	"wolf_sleep_right" : {
+		"x": 448,
+		"y": 32,
+		"w": 32,
+		"h": 16,
+		"frame": 6,
+		"speed": 10
+	},
+	"wolf_sleep_right" : {
+		"x": 448,
+		"y": 48,
+		"w": 32,
+		"h": 16,
+		"frame": 6,
+		"speed": 10
 	}
+
 
 
 }
