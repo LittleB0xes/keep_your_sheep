@@ -89,6 +89,10 @@ impl Level {
         draw_texture_ex(texture, 0.0, 0.0, WHITE, params);
     }
 
+    pub fn get_int_at(&self, x: usize, y: usize) -> u8 {
+        self.collision_grid[x + self.cell_w * y]
+    }
+
 }
 
 

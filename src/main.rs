@@ -40,6 +40,8 @@ impl Game {
         let ground_texture = Texture2D::from_file_with_format(include_bytes!("../assets/sheep/simplified/Level_0/Ground.png"), None);
         ground_texture.set_filter(FilterMode::Nearest);
 
+        let level = Level::new();
+
         let mut id_counter = 0;
 
         let atlas = read_atlas().unwrap();
@@ -47,11 +49,25 @@ impl Game {
         let hero = Entity::new(10.0, 0.0, EntityType::Hero, id_counter, &atlas);
 
         entities.push(hero);
+
+        // create a vec to store all places already taked by a sheep
+        let mut entities_grid: Vec<bool> = vec![true; level.cell_w * level.cell_h];
         for _i in 0..20 {
             id_counter += 1;
-            let x = gen_range(0, 26) as f32 * 16.0;
-            let y = gen_range(0, 15) as f32 * 16.0;
-            let sheep = Entity::new(x, y, EntityType::Sheep, id_counter, &atlas);
+            let mut free_place = false;
+            let mut x: usize = 0;
+            let mut y: usize = 0;
+
+            // Check if the place is free
+            while !free_place {
+                x = gen_range(0, 26);
+                y = gen_range(0, 15);
+                if level.get_int_at(x, y) == 0 && entities_grid[x + y * level.cell_w] {
+                    free_place = true;
+                }
+            }
+            entities_grid[x + y * level.cell_w] = false;
+            let sheep = Entity::new((x * 16) as f32, (y * 16) as f32, EntityType::Sheep, id_counter, &atlas);
 
             entities.push(sheep);
         }
@@ -59,8 +75,8 @@ impl Game {
 
         Self {
             //id_counter,
-            level: Level::new(),
             texture,
+            level,
             ground_texture,
             //atlas,
             scale: 3.0,
@@ -99,7 +115,7 @@ async fn main() {
         game.update();
 
         game.render();
-        draw_text(&format!("{}", get_fps()), 30.0, 30.0, 16.0, RED);
+        draw_text(&format!("{}", get_fps()), 30.0, 30.0, 24.0, RED);
         next_frame().await
     }
 }
