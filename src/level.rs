@@ -9,11 +9,17 @@ use macroquad::texture::DrawTextureParams;
 use serde::Deserialize;
 
 
+struct LdtkEntity {
+
+}
+
+
 #[derive(Deserialize)]
 struct SimplifiedLdtk{
     width: i32,
     height: i32,
     //layers: Vec<String>,
+    //entities: Vec<LdtkEntity>
 }
 
 

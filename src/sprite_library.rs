@@ -5,6 +5,8 @@ use std::path::Path;
 use serde_json::Result;
 use std::collections::HashMap;
 
+use crate::sprite::Sprite;
+
 #[derive(Deserialize, Debug, Clone, Copy)]
 pub struct SpriteLibraryData {
     pub x: i32,
@@ -15,31 +17,42 @@ pub struct SpriteLibraryData {
     pub speed: i32,
 }
 
-pub fn read_atlas() -> Result<HashMap<String, SpriteLibraryData>> {
-    let json_file_path = Path::new("./assets/atlas.json");
-    let atlas_file = File::open(json_file_path).expect("erreur lecture: ");
 
-    let atlas: HashMap<String, SpriteLibraryData> = serde_json::from_reader(atlas_file)?;
 
-    Ok(atlas)
-}
 
-pub fn extract_data(atlas: &HashMap<String, SpriteLibraryData>, name: String) -> SpriteLibraryData {
-    let mut data = SpriteLibraryData {
-        x: 0,
-        y: 0,
-        w: 0,
-        h: 0,
-        speed: 0,
-        frame: 0,
-    };
-    
-    data.x = atlas.get(&name).unwrap().x;
-    data.y = atlas.get(&name).unwrap().y;
-    data.w = atlas.get(&name).unwrap().w;
-    data.h = atlas.get(&name).unwrap().h;
-    data.frame = atlas.get(&name).unwrap().frame;
-    data.speed = atlas.get(&name).unwrap().speed;
 
-    data
+pub fn read_atlas() -> HashMap<String, SpriteLibraryData>{
+
+    let atlas: HashMap<String, SpriteLibraryData> = HashMap::from([
+        ("hero_walk_right".to_string(), SpriteLibraryData{x: 0, y: 0, w: 16, h: 16, frame: 4, speed: 10}),
+        ("hero_idle_right".to_string(), SpriteLibraryData{x: 0, y: 0, w: 16, h: 16, frame: 1, speed: 10}),
+        ("hero_walk_left".to_string(), SpriteLibraryData{ x: 0, y: 16, w: 16, h: 16, frame: 4, speed: 10}),
+        ("hero_idle_left".to_string(), SpriteLibraryData{ x: 0, y: 16, w: 16, h: 16, frame: 1, speed: 10 }),
+        ("hero_walk_down".to_string(),  SpriteLibraryData{ x: 0, y: 48, w: 16, h: 16, frame: 4, speed: 10 }),
+        ("hero_walk_up".to_string(), SpriteLibraryData{ x: 0, y: 32, w: 16, h: 16, frame: 4, speed: 10}),
+        ("hero_idle_up".to_string(),  SpriteLibraryData{ x: 0, y: 32, w: 16, h: 16, frame: 1, speed: 10 }),
+        ("hero_idle_down".to_string(), SpriteLibraryData{ x: 0, y: 48, w: 16, h: 16, frame: 1, speed: 10 }),
+        ("sheep_walk_right".to_string(), SpriteLibraryData{ x: 64, y: 0, w: 16, h: 16, frame: 4, speed: 10 }),
+        ("sheep_walk_left".to_string(), SpriteLibraryData{ x: 64, y: 16, w: 16, h: 16, frame: 4, speed: 10 }),
+        ("sheep_idle_right".to_string(), SpriteLibraryData{ x: 64, y: 0, w: 16, h: 16, frame: 1, speed: 10 }),
+        ("sheep_idle_left".to_string(), SpriteLibraryData{ x: 64, y: 16, w: 16, h: 16, frame: 1, speed: 10 }),
+        ("sheep_idle_down".to_string(), SpriteLibraryData{ x: 64, y: 48, w: 16, h: 16, frame: 1, speed: 10 }),
+        ("sheep_idle_up".to_string(), SpriteLibraryData{ x: 64, y: 32, w: 16, h: 16, frame: 1, speed: 10 }),
+        ("sheep_walk_down".to_string(), SpriteLibraryData{ x: 64, y: 48, w: 16, h: 16, frame: 4, speed: 10 }),
+        ("sheep_walk_up".to_string(), SpriteLibraryData{ x: 64, y: 32, w: 16, h: 16, frame: 4, speed: 10 }),
+        ("wolf_walk_right".to_string(), SpriteLibraryData{ x: 128, y: 0, w: 32, h: 16, frame: 8, speed: 5 }),
+        ("wolf_walk_left".to_string(), SpriteLibraryData{ x: 128, y: 16, w: 32, h: 16, frame: 8, speed: 5 }),
+        ("wolf_idle_right".to_string(), SpriteLibraryData{ x: 128, y: 32, w: 32, h: 16, frame: 5, speed: 10 }),
+        ("wolf_idle_left".to_string(), SpriteLibraryData{ x: 128, y: 48, w: 32, h: 16, frame: 5, speed: 10 }),
+        ("wolf_sleep_right".to_string(), SpriteLibraryData{ x: 448, y: 32, w: 32, h: 16, frame: 6, speed: 10 }),
+        ("wolf_sleep_right".to_string(), SpriteLibraryData{ x: 448, y: 48, w: 32, h: 16, frame: 6, speed: 10 })
+    ]);
+    atlas
+
+    //let json_file_path = Path::new("./assets/atlas.json");
+    //let atlas_file = File::open(json_file_path).expect("erreur lecture: ");
+
+    //let atlas: HashMap<String, SpriteLibraryData> = serde_json::from_reader(atlas_file)?;
+
+    //Ok(atlas)
 }

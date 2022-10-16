@@ -8,11 +8,11 @@ use crate::sprite_library::{self, SpriteLibraryData};
 
 use crate::puppet_master::Behaviour;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum EntityType {
     Hero,
     Sheep,
-    Wolf,
+    Wolf
 }
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone, Debug)]
@@ -143,17 +143,17 @@ impl Entity {
     pub fn animation_manager(&mut self) {
         let current_animation = self.animation_state;
         self.animation_state = match self.behaviour {
-            Behaviour::FreeWalk | Behaviour::Playable | Behaviour::DumbDog => {
-                if self.direction.x == -1.0 {
+            Behaviour::FreeWalk | Behaviour::Playable | Behaviour::DumbDog | Behaviour::RunAway { .. }=> {
+                if self.direction.x < -0.0 {
                     AnimationState::WalkLeft
                 }
-                else if self.direction.x == 1.0 {
+                else if self.direction.x > 0.0 {
                     AnimationState::WalkRight
                 }
-                else if self.direction.y == 1.0 {
+                else if self.direction.y > 0.0 {
                     AnimationState::WalkDown
                 }
-                else if self.direction.y  == -1.0 {
+                else if self.direction.y  < 0.0 {
                     AnimationState::WalkUp
                 }
                 else if self.direction == Vec2::ZERO {
@@ -187,7 +187,6 @@ impl Entity {
                 }
             },
             Behaviour::Thrown { .. } => {current_animation},
-            Behaviour::RunAway { .. } => {current_animation},
         };
 
         if self.animation_state != current_animation {
@@ -258,9 +257,10 @@ fn set_animation(
     };
 
     for anim in list.iter() {
+        println!("{:?}", anim.1);
         animations.insert(
             anim.0,
-            sprite_library::extract_data(atlas, anim.1.to_string()),
+            atlas.get(anim.1).unwrap().clone(),
         );
     }
 
@@ -273,7 +273,7 @@ fn sheep_incubator(sheep: &mut Entity) {
 }
 
 fn wolf_incubator(wolf: &mut Entity) {
-    wolf.max_speed = 2.0;
+    wolf.max_speed = 1.5;
     wolf.behaviour = Behaviour::FreeWalk;
     wolf.collision_box = Rect::new(11.0, 10.0, 12.0, 6.0);
     wolf.behaviour = Behaviour::DumbDog;

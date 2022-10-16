@@ -2,7 +2,7 @@ use macroquad::input::*;
 use macroquad::math::Vec2;
 use macroquad::rand::gen_range;
 
-use crate::entities::Entity;
+use crate::entities::{Entity, EntityType};
 use crate::level::Level;
 
 /// Behaviours enum
@@ -17,7 +17,7 @@ pub enum Behaviour {
     Transported,
     Thrown { dir: Vec2, yo: f32, h: f32, thrower: u32},
     DumbDog,
-    RunAway {dir: Vec2, running_time: f32},
+    RunAway {dir: Vec2, running_time: i32},
 }
 
 
@@ -28,11 +28,12 @@ pub fn play(entities: &mut Vec<Entity>, level: &Level) {
         let mut ent = entities[i].clone();
         match ent.behaviour {
             Behaviour::Playable => playable(&mut ent, entities),
-            Behaviour::FreeWalk => free_walk(&mut ent),
+            Behaviour::FreeWalk => free_walk(&mut ent, entities),
             Behaviour::Transported => transported(&mut ent, entities),
             Behaviour::Thrown { dir, yo, h, thrower } => thrown(&mut ent, dir, yo, h, thrower),
             Behaviour::DumbDog => dumb_dog(&mut ent),
             Behaviour::RunAway { dir, running_time } => run_away(&mut ent, dir, running_time),
+            _ => {}
         }
         
         // Replace by the new updated entity
@@ -72,7 +73,7 @@ pub fn entity_entity_collision(entities: &mut Vec<Entity>, level: &Level) {
                 _ => false,
             };
 
-            let collision =ent.collidable && !avoid_collision && entities[j].collidable && ent.id != entities[j].id;
+            let collision = ent.collidable && !avoid_collision && entities[j].collidable && ent.id != entities[j].id;
 
             // On x
             if collision
@@ -166,7 +167,7 @@ fn playable(ent: &mut Entity, entities: &mut Vec<Entity>) {
 }
 
 /// For FreeWalk behaviour
-fn free_walk(ent: &mut Entity) {
+fn free_walk(ent: &mut Entity, entities: &Vec<Entity>) {
     if gen_range(0, 100) < 2 {
         let alea = gen_range(0, 6);
         match alea {
@@ -175,6 +176,13 @@ fn free_walk(ent: &mut Entity) {
             2 => ent.direction = Vec2::new(1.0, 0.0),
             3 => ent.direction = Vec2::new(-1.0, 0.0),
             _ => ent.direction = Vec2::ZERO,
+        }
+    }
+
+    for other in entities.iter() {
+        if other.entity_type == EntityType::Wolf && ent.position.distance_squared(other.position) < 4000.0 {
+            let dir = (ent.position - other.position).normalize();
+            ent.behaviour = Behaviour::RunAway { dir, running_time: 20 }
         }
     }
     ent.apply_direction();
@@ -204,7 +212,11 @@ fn thrown(ent: &mut Entity, dir: Vec2, yo: f32, h: f32, thrower: u32) {
         ent.direction.y += 0.025;
     }
     if h - 0.4 <= 0.0 {
-        ent.behaviour = Behaviour::FreeWalk;
+        // Restore the default behaviour  for each type of entity
+        match ent.entity_type {
+            EntityType::Wolf => ent.behaviour = Behaviour::DumbDog,
+            _ => ent.behaviour = Behaviour::FreeWalk,
+        }
     }
     else {
         ent.behaviour = Behaviour::Thrown {
@@ -231,7 +243,12 @@ fn dumb_dog(ent: &mut Entity) {
     ent.apply_direction();
 }
 
-fn run_away(ent: &mut Entity, dir: Vec2, running_time: f32) {
-
-
+fn run_away(ent: &mut Entity, dir: Vec2, running_time: i32) {
+    ent.direction = dir;
+    
+    if running_time > 0 {
+        ent.behaviour = Behaviour::RunAway { dir, running_time: running_time - 1};
+        ent.apply_direction_with_speed(1.0);
+    }
+    else {ent.behaviour = Behaviour::FreeWalk}
 }

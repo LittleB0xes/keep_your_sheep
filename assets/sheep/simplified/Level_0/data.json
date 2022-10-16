@@ -7,5 +7,19 @@
 	"layers": [
 		"Ground.png"
 	],
-	"entities" : {}
+	"entities": {
+		"Tree": [
+			{
+				"id": "Tree",
+				"iid": "c5028d50-2a00-11ed-b08b-512a5d1095bb",
+				"layer": "Entities",
+				"x": 48,
+				"y": 80,
+				"width": 16,
+				"height": 16,
+				"color": 9755059,
+				"customFields" : {}
+			}
+		]
+	}
 }

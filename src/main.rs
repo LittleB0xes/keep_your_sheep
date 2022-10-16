@@ -1,5 +1,5 @@
 use std::time::{SystemTime, UNIX_EPOCH};
-
+use std::collections::HashMap;
 use macroquad::prelude::*;
 use macroquad::rand::{gen_range, srand};
 
@@ -44,7 +44,9 @@ impl Game {
 
         let mut id_counter = 0;
 
-        let atlas = read_atlas().unwrap();
+
+        let atlas: HashMap<String, SpriteLibraryData> = sprite_library::read_atlas();
+
         let mut entities = Vec::new();
         let hero = Entity::new(10.0, 0.0, EntityType::Hero, id_counter, &atlas);
 
@@ -52,7 +54,7 @@ impl Game {
 
         // create a vec to store all places already taked by a sheep
         let mut entities_grid: Vec<bool> = vec![true; level.cell_w * level.cell_h];
-        for _i in 0..20 {
+        for _i in 0..0 {
             id_counter += 1;
             let mut free_place = false;
             let mut x: usize = 0;
@@ -71,6 +73,7 @@ impl Game {
 
             entities.push(sheep);
         }
+        id_counter += 1;
         entities.push(Entity::new(10.0, 100.0, EntityType::Wolf, id_counter, &atlas));
 
         Self {
@@ -115,7 +118,7 @@ async fn main() {
         game.update();
 
         game.render();
-        draw_text(&format!("{}", get_fps()), 30.0, 30.0, 24.0, RED);
+        //draw_text(&format!("{}", get_fps()), 30.0, 30.0, 24.0, RED);
         next_frame().await
     }
 }
