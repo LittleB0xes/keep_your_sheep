@@ -48,11 +48,4 @@ pub fn read_atlas() -> HashMap<String, SpriteLibraryData>{
         ("wolf_sleep_right".to_string(), SpriteLibraryData{ x: 448, y: 48, w: 32, h: 16, frame: 6, speed: 10 })
     ]);
     atlas
-
-    //let json_file_path = Path::new("./assets/atlas.json");
-    //let atlas_file = File::open(json_file_path).expect("erreur lecture: ");
-
-    //let atlas: HashMap<String, SpriteLibraryData> = serde_json::from_reader(atlas_file)?;
-
-    //Ok(atlas)
 }
