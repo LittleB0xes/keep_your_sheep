@@ -97,13 +97,14 @@ pub fn entity_entity_collision(entities: &mut Vec<Entity>, level: &Level) {
         }
         // Collision, background collision grid... a basic one
         // on x
-        if  level.cbox_overlaps(ent.get_collision_box_diff(true, false)) {
+        if  level.cbox_overlaps_with_value(1, ent.get_collision_box_diff(true, false)){
+
             ent.direction.x = 0.0;
             ent.velocity.x = 0.0; 
         }
 
         // on y
-        if  level.cbox_overlaps(ent.get_collision_box_diff(false, true)) {
+        if  level.cbox_overlaps_with_value(1, ent.get_collision_box_diff(false, true)){
             ent.direction.y = 0.0;
             ent.velocity.y = 0.0;
         }

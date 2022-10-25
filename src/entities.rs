@@ -1,7 +1,5 @@
 use std::collections::HashMap;
-
-use macroquad::math::{Rect, Vec2};
-use macroquad::texture::Texture2D;
+use macroquad::prelude::*;
 
 use crate::sprite::Sprite;
 use crate::sprite_library::{self, SpriteLibraryData};
@@ -86,6 +84,9 @@ impl Entity {
 
     pub fn render(&mut self, texture: Texture2D, scale: f32) {
         self.sprite.draw_sprite(texture, scale);
+        
+        // Debug collision box
+        //draw_rectangle(self.get_collision_box().x * scale, self.get_collision_box().y * scale, self.get_collision_box().w * scale, self.get_collision_box().h * scale, BLUE)
     }
 
     pub fn apply_direction(&mut self) {
@@ -257,7 +258,6 @@ fn set_animation(
     };
 
     for anim in list.iter() {
-        println!("{:?}", anim.1);
         animations.insert(
             anim.0,
             atlas.get(anim.1).unwrap().clone(),

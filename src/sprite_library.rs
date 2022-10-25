@@ -1,8 +1,4 @@
 use serde::Deserialize;
-use std::fs::File;
-use std::path::Path;
-
-use serde_json::Result;
 use std::collections::HashMap;
 
 use crate::sprite::Sprite;
@@ -16,10 +12,6 @@ pub struct SpriteLibraryData {
     pub frame: i32,
     pub speed: i32,
 }
-
-
-
-
 
 pub fn read_atlas() -> HashMap<String, SpriteLibraryData>{
 

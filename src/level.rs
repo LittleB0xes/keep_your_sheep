@@ -1,17 +1,14 @@
 use std::path::Path;
 use std::fs::{File, self};
 
+use macroquad::shapes::draw_rectangle;
 use macroquad::texture::{Texture2D, draw_texture_ex};
-use macroquad::color::WHITE;
+use macroquad::color::{WHITE, RED};
 use macroquad::math::{Rect, Vec2};
 
 use macroquad::texture::DrawTextureParams;
 use serde::Deserialize;
 
-
-struct LdtkEntity {
-
-}
 
 
 #[derive(Deserialize)]
@@ -53,14 +50,12 @@ impl Level {
         for (index, value) in collision_grid.iter().enumerate() {
             if *value != 0 {
                 collision_boxes.push(CBox{
-                    rect: Rect { x: 16.0 * (index % (data.width / 16) as usize) as f32, y: 16.0 * (index / (data.width / 16) as usize) as f32 + 5.0, w: 16.0, h: 11.0 },
+                    rect: Rect { x: 16.0 * (index % (data.width / 16) as usize) as f32, y: 16.0 * (index / (data.width / 16) as usize) as f32 + 5.0, w: 16.0, h: 16.0 },
                     box_type: *value,
                 });
 
             }
         }
-
-
 
         Level {
             cell_w: (data.width / 16) as usize,
@@ -72,10 +67,10 @@ impl Level {
         }
     }
 
-    pub fn cbox_overlaps(&self, rect: Rect) -> bool {
+    pub fn cbox_overlaps_with_value(&self, value: u8, rect: Rect) -> bool {
         let mut flag = false;
         for cbox in self.collision_boxes.iter() {
-            if rect.overlaps(&cbox.rect) {
+            if cbox.box_type == value &&rect.overlaps(&cbox.rect) {
                 flag = true;
                 break;
             }
@@ -93,7 +88,15 @@ impl Level {
             flip_y: false,
             pivot: None };
         draw_texture_ex(texture, 0.0, 0.0, WHITE, params);
+
+        // debug collision box
+        //for b in self.collision_boxes.iter() {
+        //    let mut color = WHITE;
+        //    if b.box_type == 2 {color = RED}
+        //    draw_rectangle(b.rect.x * 3.0, b.rect.y * 3.0, b.rect.w * 3.0, b.rect.h * 3.0, color);
+        //}
     }
+    
 
     pub fn get_int_at(&self, x: usize, y: usize) -> u8 {
         self.collision_grid[x + self.cell_w * y]

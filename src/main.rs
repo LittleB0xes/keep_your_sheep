@@ -20,6 +20,7 @@ struct Game {
     level: Level,
     texture: Texture2D,
     ground_texture: Texture2D,
+    sheep_in: i32,
     //atlas: HashMap<String, SpriteLibraryData>,
     scale: f32,
 
@@ -54,7 +55,7 @@ impl Game {
 
         // create a vec to store all places already taked by a sheep
         let mut entities_grid: Vec<bool> = vec![true; level.cell_w * level.cell_h];
-        for _i in 0..0 {
+        for _i in 0..10 {
             id_counter += 1;
             let mut free_place = false;
             let mut x: usize = 0;
@@ -81,6 +82,7 @@ impl Game {
             texture,
             level,
             ground_texture,
+            sheep_in: 0,
             //atlas,
             scale: 3.0,
             entities,
@@ -94,6 +96,21 @@ impl Game {
 
     fn update(&mut self) {
         puppet_master::play(&mut self.entities, &self.level);
+
+        // Need to check how many sheep are in the place
+        self.sheep_in = 0;
+        for ent in self.entities.iter() {
+            match ent.entity_type {
+                EntityType::Sheep => {
+                    if self.level.cbox_overlaps_with_value(2, ent.get_collision_box()) {
+                        self.sheep_in += 1;
+                    }
+                },
+                _ => {}
+
+            }
+        }
+
     }
 
     fn render(&mut self) {
@@ -108,6 +125,7 @@ impl Game {
         for ent in self.entities.iter_mut() {
             ent.render(self.texture, self.scale);
         }
+        draw_text(&format!("{}", self.sheep_in), 30.0, 30.0, 24.0, RED);
     }
 }
 
